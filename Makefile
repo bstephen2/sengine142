@@ -26,7 +26,8 @@ CMODS	=	main.c options.c init.c board.c direct.c dir_xml.c boardlist.c \
 COBJS	=	main.o options.o init.o board.o direct.o dir_xml.o boardlist.o \
 			memory.o pool.o cldir2.o dir2_class_xml.o
 CASMS	=	main.asm options.asm init.asm board.asm direct.asm dir_xml.asm \
-			boardlist.asm memory.asm
+			boardlist.asm memory.asm pool.asm cldir2.asm dir2_class_xml.asm \
+			genx.asm charprops.asm md5.asm
 
 sengine:	${COBJS} ${MD5OBJS} ${GXOBJS}
 	${LD}   ${LDFLAGS} ${COBJS} ${MD5OBJS} ${GXOBJS}
