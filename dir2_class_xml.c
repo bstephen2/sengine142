@@ -48,6 +48,15 @@ static const unsigned char thr[] = "Threat";
 static const unsigned char refut[] = "Refut";
 static const unsigned char act[] = "Actual";
 static const unsigned char key[] = "Key";
+static const unsigned char type[] = "Type";
+static const unsigned char up_flights[] = "Up_Flights";
+static const unsigned char up_checks[] = "Up_Checks";
+static const unsigned char up_fgivers[] = "Up_Fgivers";
+static const unsigned char up_caps[] = "Up_Caps";
+static const unsigned char tot_up[] = "Tot_Up";
+static const unsigned char added[] = "Added";
+static const unsigned char changed[] = "Changed";
+static const unsigned char removed[] = "Removed";
 
 void start_class_2_xml()
 {
@@ -70,6 +79,15 @@ void end_class_2_xml()
 void start_static_class_xml()
 {
     (void) genxStartElementLiteral(w, NULL, stat);
+
+    return;
+}
+
+void add_static_type(char* in_type)
+{
+    (void) genxStartElementLiteral(w, NULL, type);
+    (void) genxAddText(w, (unsigned char*) in_type);
+    (void) genxEndElement(w);
 
     return;
 }

@@ -131,7 +131,7 @@ void do_direct(BOARD* init_pos)
 
     end_dir();
 
-    if ((opt_classify == true) && (opt_aim == MATE) && (opt_stip == DIRECT) && (opt_moves == 2)) {
+    if ((opt_classify == true) && (opt_aim == MATE) && (opt_stip == DIRECT) && (opt_moves == 2) && (sound == SOUND)) {
         class_direct_2(dir_sol, init_pos);
     }
 

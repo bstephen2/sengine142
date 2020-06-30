@@ -10,5 +10,5 @@
 					--fleck \
 					--meson \
 					--classify
-echo $?
+echo "Return Code = $?"
 exit 0
