@@ -119,6 +119,8 @@ bool set_complete(DIR_SOL* insol, BOARD* inBrd)
 
             rc = (set_count == set_full_count) ? true : false;
         }
+        
+        freeBoardlist(bList);
     }
 
     return rc;
