@@ -29,6 +29,9 @@ void end_virtual_class_xml(void);
 void start_actual_class_xml(void);
 void end_actual_class_xml(void);
 void add_static_type(char*);
+void add_added(int);
+void add_removed(int);
+void add_changed(int);
 
 static void do_statics(DIR_SOL*, BOARD*);
 static void do_sets(DIR_SOL*, BOARD*);
@@ -36,9 +39,14 @@ static void do_virtual(DIR_SOL*, BOARD*);
 static void do_actual(DIR_SOL*, BOARD*);
 static int get_set_size(DIR_SOL*);
 static bool set_complete(DIR_SOL*, BOARD*);
-static int get_changed_mates(DIR_SOL*);
-static int get_added_mates(DIR_SOL*);
-static int get_removed_mates(DIR_SOL*);
+static void get_changed_and_removed_mates(DIR_SOL*);
+static void get_added_mates(DIR_SOL*);
+static bool mate_equals(BOARD*, BOARD*);
+static bool black_equals(BOARD*, BOARD*);
+
+static int ChangedMates = 0;
+static int AddedMates = 0;
+static int RemovedMates = 0;
 
 void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 {
@@ -56,12 +64,14 @@ void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 
 void do_statics(DIR_SOL* insol, BOARD* inBrd)
 {
-    int ChangedMates = get_changed_mates(insol);
-    int AddedMates = get_added_mates(insol);
-    int RemovedMates = get_removed_mates(insol);
+    get_changed_and_removed_mates(insol);
+    get_added_mates(insol);
     int SetSize = get_set_size(insol);
 
     start_static_class_xml();
+    add_changed(ChangedMates);
+    add_added(AddedMates);
+    add_removed(RemovedMates);
 
     if (insol->keys->vektor->check == true) {
         add_static_type("CHECKING_KEY");
@@ -119,26 +129,107 @@ bool set_complete(DIR_SOL* insol, BOARD* inBrd)
 
             rc = (set_count == set_full_count) ? true : false;
         }
-        
+
         freeBoardlist(bList);
     }
 
     return rc;
 }
 
-int get_changed_mates(DIR_SOL* insol)
+void get_changed_and_removed_mates(DIR_SOL* insol)
 {
-    return 1;
+    // Iterate round set variations counting changed and removed.
+    // Only inspect variations that are dual-free in set and actual.
+
+    if (insol->set->vektor != NULL) {
+        BOARD* elt;
+
+        LL_FOREACH(insol->set->vektor, elt) {
+            int mateCount;
+            BOARD* tp;
+            BOARDLIST* setMates = elt->nextply;
+            LL_COUNT(setMates->vektor, tp, mateCount);
+
+            if (mateCount == 1) {
+                bool found = false;
+            }
+        }
+    }
+
+    /*
+    while (i.hasNext() == true) {
+    	var = (Move) i.next();
+    	setMates = var.getNext();
+
+    	if (setMates.size() == 1) {
+    		found = false;
+    		j = blackDefences.iterator();
+    		L1:
+
+    		while (j.hasNext() == true) {
+    			defence = (Move) j.next();
+
+    			if (var.Blackequals(defence) == true) {
+    				actualMates = defence.getNext();
+
+    				if (actualMates.size() == 1) {
+    					found = true;
+    					sMate = (Move) setMates.get(0);
+    					aMate = (Move) actualMates.get(0);
+
+    					if (sMate.mateEquals(aMate) == false) {
+    						changedMates++;
+    					}
+
+    					break L1;
+    				}
+    			}
+    		}
+
+    		if (found == false) {
+    			removedMates++;
+    		}
+    	}
+    }
+    */
+    return;
 }
 
-int get_added_mates(DIR_SOL* insol)
+void get_added_mates(DIR_SOL* insol)
 {
-    return 1;
-}
+    // Iterate round actual variations counting added mates.
+    // Inspect dual-free variations only.
+    /*
+    while (i.hasNext() == true) {
+    	defence = (Move) i.next();
+    	actualMates = defence.getNext();
 
-int get_removed_mates(DIR_SOL* insol)
-{
-    return 1;
+    	if (actualMates.size() == 1) {
+    		found = false;
+    		j = setBlack.iterator();
+    		L2:
+
+    		while (j.hasNext() == true) {
+    			var = (Move) j.next();
+
+    			if (var.Blackequals(defence) == true) {
+    				setMates = var.getNext();
+
+    				if (setMates.size() == 1) {
+    					found = true;
+    					break L2;
+    				}
+    			}
+    		}
+
+    		if (found == false) {
+    			addedMates++;
+    		}
+    	}
+    }
+    */
+
+    return;
 }
 
 void do_sets(DIR_SOL* insol, BOARD* inBrd)
@@ -163,6 +254,32 @@ void do_actual(DIR_SOL* insol, BOARD* inBrd)
     end_actual_class_xml();
 
     return;
+}
+
+bool mate_equals(BOARD* brda, BOARD* brdb)
+{
+    if (brda->mover != brdb->mover) return false;
+
+    if (brda->to != brdb->to) return false;
+
+    if (brda->from != brdb->from) return false;
+
+    if (brda->promotion != brdb->promotion) return false;
+
+    return true;
+}
+
+bool black_equals(BOARD* brda, BOARD* brdb)
+{
+    if (brda->mover != brdb->mover) return false;
+
+    if (brda->from != brdb->from) return false;
+
+    if (brda->to != brdb->to) return false;
+
+    if (brda->promotion != brdb->promotion) return false;
+
+    return true;
 }
 
 

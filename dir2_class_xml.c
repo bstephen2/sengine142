@@ -34,6 +34,7 @@
 
 #include "sengine.h"
 #include "genx.h"
+#include "utstring.h"
 
 static genxWriter w;
 static const unsigned char mc[] = "MesonClass";
@@ -79,6 +80,54 @@ void end_class_2_xml()
 void start_static_class_xml()
 {
     (void) genxStartElementLiteral(w, NULL, stat);
+
+    return;
+}
+
+void add_added(int inInt)
+{
+    UT_string* s;
+
+    utstring_new(s);
+
+    (void) genxStartElementLiteral(w, NULL, added);
+    utstring_printf(s, "%d", inInt);
+    (void) genxAddText(w, (unsigned char*) utstring_body(s));
+    (void) genxEndElement(w);
+
+    utstring_free(s);
+
+    return;
+}
+
+void add_removed(int inInt)
+{
+    UT_string* s;
+
+    utstring_new(s);
+
+    (void) genxStartElementLiteral(w, NULL, removed);
+    utstring_printf(s, "%d", inInt);
+    (void) genxAddText(w, (unsigned char*) utstring_body(s));
+    (void) genxEndElement(w);
+
+    utstring_free(s);
+
+    return;
+}
+
+void add_changed(int inInt)
+{
+    UT_string* s;
+
+    utstring_new(s);
+
+    (void) genxStartElementLiteral(w, NULL, changed);
+    utstring_printf(s, "%d", inInt);
+    (void) genxAddText(w, (unsigned char*) utstring_body(s));
+    (void) genxEndElement(w);
+
+    utstring_free(s);
 
     return;
 }
