@@ -142,56 +142,47 @@ void get_changed_and_removed_mates(DIR_SOL* insol)
     // Only inspect variations that are dual-free in set and actual.
 
     if (insol->set->vektor != NULL) {
-        BOARD* elt;
+        BOARDLIST* defences = insol->keys->vektor->nextply;
+        BOARD* setDefence;
 
-        LL_FOREACH(insol->set->vektor, elt) {
+        LL_FOREACH(insol->set->vektor, setDefence) {
             int mateCount;
             BOARD* tp;
-            BOARDLIST* setMates = elt->nextply;
+            BOARDLIST* setMates = setDefence->nextply;
             LL_COUNT(setMates->vektor, tp, mateCount);
 
             if (mateCount == 1) {
                 bool found = false;
+                BOARD* setMate = setMates->vektor;
+                BOARD* defence;
+
+                LL_FOREACH(defences->vektor, defence) {
+
+                    if (black_equals(setDefence, defence) == true) {
+                        int aMateCount;
+                        BOARDLIST* actualMates = defence->nextply;
+                        BOARD* tp1;
+                        LL_COUNT(actualMates->vektor, tp1, aMateCount);
+
+                        if (aMateCount == 1) {
+                            found = true;
+
+                            if (mate_equals(setMate, actualMates->vektor) == false) {
+                                ChangedMates++;
+                            }
+
+                            break;
+                        }
+                    }
+                }
+
+                if (found == false) {
+                    RemovedMates++;
+                }
             }
         }
     }
 
-    /*
-    while (i.hasNext() == true) {
-    	var = (Move) i.next();
-    	setMates = var.getNext();
-
-    	if (setMates.size() == 1) {
-    		found = false;
-    		j = blackDefences.iterator();
-    		L1:
-
-    		while (j.hasNext() == true) {
-    			defence = (Move) j.next();
-
-    			if (var.Blackequals(defence) == true) {
-    				actualMates = defence.getNext();
-
-    				if (actualMates.size() == 1) {
-    					found = true;
-    					sMate = (Move) setMates.get(0);
-    					aMate = (Move) actualMates.get(0);
-
-    					if (sMate.mateEquals(aMate) == false) {
-    						changedMates++;
-    					}
-
-    					break L1;
-    				}
-    			}
-    		}
-
-    		if (found == false) {
-    			removedMates++;
-    		}
-    	}
-    }
-    */
     return;
 }
 
@@ -199,35 +190,41 @@ void get_added_mates(DIR_SOL* insol)
 {
     // Iterate round actual variations counting added mates.
     // Inspect dual-free variations only.
-    /*
-    while (i.hasNext() == true) {
-    	defence = (Move) i.next();
-    	actualMates = defence.getNext();
 
-    	if (actualMates.size() == 1) {
-    		found = false;
-    		j = setBlack.iterator();
-    		L2:
+    BOARDLIST* defences = insol->keys->vektor->nextply;
+    BOARDLIST* setVars = insol->set;
+    BOARD* defence;
 
-    		while (j.hasNext() == true) {
-    			var = (Move) j.next();
+    LL_FOREACH(defences->vektor, defence) {
+        int MateCount;
+        BOARD* tp1;
+        BOARDLIST* mates = defence->nextply;
+        LL_COUNT(mates->vektor, tp1, MateCount);
 
-    			if (var.Blackequals(defence) == true) {
-    				setMates = var.getNext();
+        if (MateCount == 1) {
+            bool found = false;
+            BOARD* setVar;
 
-    				if (setMates.size() == 1) {
-    					found = true;
-    					break L2;
-    				}
-    			}
-    		}
+            LL_FOREACH(setVars->vektor, setVar) {
 
-    		if (found == false) {
-    			addedMates++;
-    		}
-    	}
+                if (black_equals(defence, setVar) == true) {
+                    int ccount;
+                    BOARD* tp2;
+                    BOARDLIST* setMates = setVar->nextply;
+                    LL_COUNT(setMates->vektor, tp2, ccount);
+
+                    if (ccount == 1) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (found == false) {
+                AddedMates++;
+            }
+        }
     }
-    */
 
     return;
 }
