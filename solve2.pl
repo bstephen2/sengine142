@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #	solve2.pl
 #	(c) 2020, B D Stephenson
 #	brian@bstephen.me.uk
@@ -17,8 +18,11 @@ Readonly::Scalar my $MAX_FAILS => 10;
 Readonly::Scalar my $EMPTY     => q{};
 Readonly::Scalar my $PROG_NAME => 'solve2.pl';
 Readonly::Scalar my $AUTHOR    => 'Brian Stephenson';
+Readonly::Scalar my $PARAM_1   => 1;
+Readonly::Scalar my $PARAM_2   => 2;
+Readonly::Scalar my $PARAM_3   => 3;
 
-our $VERSION = 1.1;
+our $VERSION = 1.2;
 
 my $rc;
 my $db_handle;
@@ -50,6 +54,8 @@ sub process {
     my $ep;
     my $extra;
     my $solution;
+    my $class;
+    my $engineout;
     my $command;
     my $meson;
     my $soundstatus;
@@ -62,8 +68,8 @@ sub process {
       . 'ORDER BY pid '
       . 'LIMIT 10000';
 
-    my $upsql =
-      'UPDATE classol SET sol = COMPRESS(?), class = NULL WHERE (pid = ?)';
+    my $upsql  = 'UPDATE classol SET sol = COMPRESS(?), class = COMPRESS(?) WHERE (pid = ?)';
+    my $upsqlu = 'UPDATE classol SET sol = COMPRESS(?), class = NULL WHERE (pid = ?)';
     my $nupsql = 'UPDATE problem SET sound = ? WHERE pid = ? LIMIT 1';
 
     $sth = $dbh->prepare($sql);
@@ -92,31 +98,25 @@ sub process {
         }
 
         $command =
-"sengine141 --moves=$moves --gbr=$gbr --kings=$kings --pos=$pos --actual --fleck --set --tries --meson $extra |";
+"sengine142 --moves=$moves --gbr=$gbr --kings=$kings --pos=$pos --actual --fleck --set --tries --meson --classify $extra |";
 
         ## use critic
         $count++;
-        $rs       = print "No. $count ($stip) $pid ";
-        $solution = $EMPTY;
+        $rs        = print "No. $count ($stip) $pid ";
+        $engineout = $EMPTY;
 
         ## no critic (ProhibitTwoArgOpen)
 
-        open $meson, $command || die "Can't run sengine64!!\n";
+        open $meson, $command || die "Can't run sengine142!!\n";
         ## use critic
 
         while (<$meson>) {
-            $solution .= $_;
+            $engineout .= $_;
         }
 
         $rs = close $meson;
 
-        $cth = $dbh->prepare($upsql);
-        $cth->bind_param( 1, $solution );
-        $cth->bind_param( 2, $pid );
-        $cth->execute();
-        $cth->finish();
-
-        ($soundstatus) = $solution =~ m/<Soundness>(.*)<\/Soundness>/xsm;
+        ($soundstatus) = $engineout =~ m/<Soundness>(.*)<\/Soundness>/xsm;
         printf "Status = %s\n", $soundstatus;
 
         $cth = $dbh->prepare($nupsql);
@@ -124,6 +124,28 @@ sub process {
         $cth->bind_param( 2, $pid );
         $cth->execute();
         $cth->finish();
+
+        if ( $soundstatus eq 'SOUND' ) {
+            ( $solution, $class ) =
+              $engineout =~ /(^<MesonSolution>.*<\/MesonSolution>).*(<MesonClass>.*<\/MesonClass>)$/xms;
+
+            #$rs = say "$solution\n";
+            #$rs = say "$class\n";
+
+            $cth = $dbh->prepare($upsql);
+            $cth->bind_param( $PARAM_1, $solution );
+            $cth->bind_param( $PARAM_2, $class );
+            $cth->bind_param( $PARAM_3, $pid );
+            $cth->execute();
+            $cth->finish();
+        }
+        else {
+            $cth = $dbh->prepare($upsqlu);
+            $cth->bind_param( $PARAM_1, $engineout );
+            $cth->bind_param( $PARAM_2, $pid );
+            $cth->execute();
+            $cth->finish();
+        }
 
         $ct++;
     }
@@ -147,8 +169,7 @@ sub meson_connect {
     ## no critic (ProhibitPostFixControls)
     do {
         $dbh = eval {
-            my $dbhandle =
-              DBI->connect( "dbi:mysql:$db:$server", $user, $password, \%attr );
+            my $dbhandle = DBI->connect( "dbi:mysql:$db:$server", $user, $password, \%attr );
 
             return $dbhandle;
         };
