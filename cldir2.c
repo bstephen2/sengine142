@@ -64,35 +64,41 @@ void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 
 void do_statics(DIR_SOL* insol, BOARD* inBrd)
 {
-    get_changed_and_removed_mates(insol);
-    get_added_mates(insol);
-    int SetSize = get_set_size(insol);
-
     start_static_class_xml();
-    add_changed(ChangedMates);
-    add_added(AddedMates);
-    add_removed(RemovedMates);
 
-    if (insol->keys->vektor->check == true) {
-        add_static_type("CHECKING_KEY");
-    } else if (insol->keys->vektor->threat == NULL) {
+    if (inBrd->check == false) {
+        get_changed_and_removed_mates(insol);
+        get_added_mates(insol);
+        int SetSize = get_set_size(insol);
 
-        if ((SetSize > 0) && (set_complete(insol, inBrd) == true)) {
+        add_changed(ChangedMates);
+        add_added(AddedMates);
+        add_removed(RemovedMates);
 
-            if (ChangedMates > 0) {
-                add_static_type("MUTATE");
+        if (insol->keys->vektor->check == true) {
+            add_static_type("CHECKING_KEY");
+        } else if (insol->keys->vektor->threat == NULL) {
+
+            if ((SetSize > 0) && (set_complete(insol, inBrd) == true)) {
+
+                if (ChangedMates > 0) {
+                    add_static_type("MUTATE");
+                } else {
+                    add_static_type("WAITER");
+                }
             } else {
-                add_static_type("WAITER");
+                add_static_type("INCOMPLETE_BLOCK");
             }
         } else {
-            add_static_type("INCOMPLETE_BLOCK");
+            if ((SetSize > 0) && (set_complete(insol, inBrd) == true)) {
+                add_static_type("BLOCK_THREAT");
+            } else {
+                add_static_type("THREAT");
+            }
         }
+
     } else {
-        if ((SetSize > 0) && (set_complete(insol, inBrd) == true)) {
-            add_static_type("BLOCK_THREAT");
-        } else {
-            add_static_type("THREAT");
-        }
+        add_static_type("WHITE_IN_CHECK");
     }
 
     end_static_clas_xml();

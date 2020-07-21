@@ -801,9 +801,9 @@ static BOARDLIST* blackMove(BOARD* inBrd)
             char* stf = toSquare(b->from);
             char* stt = toSquare(b->to);
             (void) fprintf(stderr,
-            "   1...%c%s-%s (added = %u, hit null = %u, hit_list = %u)\n",
-            toPiece(b->mover), stf, stt, hash_added,
-            hash_hit_null, hash_hit_list);
+                           "   1...%c%s-%s (added = %u, hit null = %u, hit_list = %u)\n",
+                           toPiece(b->mover), stf, stt, hash_added,
+                           hash_hit_null, hash_hit_list);
             (void) fflush(stderr);
             free(stf);
             free(stt);
@@ -1041,9 +1041,9 @@ static BOARDLIST* norm_first_move(BOARD* brd)
             char* to = toSquare(b->to);
 
             (void) fprintf(stderr,
-            "1.%c%s-%s (added = %u, hit_null = %u, hit_list = %u)\n",
-            toPiece(b->mover), from, to, hash_added, hash_hit_null,
-            hash_hit_list);
+                           "1.%c%s-%s (added = %u, hit_null = %u, hit_list = %u)\n",
+                           toPiece(b->mover), from, to, hash_added, hash_hit_null,
+                           hash_hit_list);
             (void) fflush(stderr);
             free(from);
             free(to);
