@@ -51,8 +51,14 @@ bool bListEquals(BOARDLIST* ibl, BOARDLIST* obl)
     BOARD* b;
     assert(obl != NULL);
     assert(ibl != NULL);
+    assert(ibl->moveNumber == obl->moveNumber);
     //assert(obl->vektor != NULL);
     //assert(ibl->vektor != NULL);
+
+#ifdef MOVESTAT
+    fprintf(stderr, "%d bListEquals()\n", ibl->moveNumber);
+#endif
+
     LL_COUNT(ibl->vektor, tmp, counti);
     LL_COUNT(obl->vektor, tmp1, counto);
 
@@ -64,8 +70,13 @@ bool bListEquals(BOARDLIST* ibl, BOARDLIST* obl)
         return true;
     }
 
+    /*
     a = ibl->vektor->next;
     b = obl->vektor->next;
+    */
+
+    a = ibl->vektor;
+    b = obl->vektor;
 
     while (a != NULL) {
         assert(b != NULL);

@@ -801,9 +801,9 @@ static BOARDLIST* blackMove(BOARD* inBrd)
             char* stf = toSquare(b->from);
             char* stt = toSquare(b->to);
             (void) fprintf(stderr,
-                           "   1...%c%s-%s (added = %u, hit null = %u, hit_list = %u)\n",
-                           toPiece(b->mover), stf, stt, hash_added,
-                           hash_hit_null, hash_hit_list);
+            "   1...%c%s-%s (added = %u, hit null = %u, hit_list = %u)\n",
+            toPiece(b->mover), stf, stt, hash_added,
+            hash_hit_null, hash_hit_list);
             (void) fflush(stderr);
             free(stf);
             free(stt);
@@ -1041,9 +1041,9 @@ static BOARDLIST* norm_first_move(BOARD* brd)
             char* to = toSquare(b->to);
 
             (void) fprintf(stderr,
-                           "1.%c%s-%s (added = %u, hit_null = %u, hit_list = %u)\n",
-                           toPiece(b->mover), from, to, hash_added, hash_hit_null,
-                           hash_hit_list);
+            "1.%c%s-%s (added = %u, hit_null = %u, hit_list = %u)\n",
+            toPiece(b->mover), from, to, hash_added, hash_hit_null,
+            hash_hit_list);
             (void) fflush(stderr);
             free(from);
             free(to);
@@ -1138,9 +1138,17 @@ static void weedNonDefences(BOARDLIST* threats, BOARDLIST* bbl, bool fleck)
     assert(bbl != NULL);
     int ct;
 
+
     if ((fleck == true) && (bbl->moveNumber == 1)) {
         LL_FOREACH_SAFE(bbl->vektor, bm, tmp) {
             if (bm->mover != KING) {
+#ifdef MOVESTAT
+
+                if (bbl->moveNumber == 1) {
+                    fprintf(stderr, "WeedNonDefences %d...\n", bbl->moveNumber);
+                }
+
+#endif
                 wbl = bm->nextply;
 
                 if (wbl != NULL) {
@@ -1164,6 +1172,11 @@ static void weedNonDefences(BOARDLIST* threats, BOARDLIST* bbl, bool fleck)
     } else {
         LL_FOREACH_SAFE(bbl->vektor, bm, tmp) {
             if (bm->mover != KING) {
+#ifdef MOVESTAT
+
+                fprintf(stderr, "%d... WeedNonDefences\n", bbl->moveNumber);
+
+#endif
                 wbl = bm->nextply;
 
                 if (wbl != NULL) {
@@ -1171,6 +1184,13 @@ static void weedNonDefences(BOARDLIST* threats, BOARDLIST* bbl, bool fleck)
                     LL_FOREACH(threats->vektor, tm) {
                         LL_FOREACH(wbl->vektor, wm) {
                             if (deepEquals(wm, tm) == true) {
+#ifdef MOVESTAT
+
+                                if (bbl->moveNumber == 1) {
+                                    fputs("TO_WEED\n", stderr);
+                                }
+
+#endif
                                 c++;
                             }
                         }
