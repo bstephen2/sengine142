@@ -1,7 +1,7 @@
 #!/bin/bash
-	sengine142	--kings=e3e5 \
-					--gbr=1852.24 \
-					--pos=a6h7d1d8g5a1b1c3f6d5e6c5d7e7b4g4 \
+	sengine142	--kings=a5e4 \
+					--gbr=4255.44 \
+					--pos=h7f5e8h4b6g4b8c7g6g8e5d4c2d2h6h5c4f3 \
 					--moves=2 \
 					--stip=# \
 					--actual \

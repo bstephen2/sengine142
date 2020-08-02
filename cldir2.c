@@ -32,21 +32,32 @@ void add_static_type(char*);
 void add_added(int);
 void add_removed(int);
 void add_changed(int);
+void add_up_flights(int);
+void add_up_checks(int);
+void add_up_fgivers(int);
+void add_up_caps(int);
+void add_tot_up(int);
 
 static void do_statics(DIR_SOL*, BOARD*);
 static void do_sets(DIR_SOL*, BOARD*);
 static void do_virtual(DIR_SOL*, BOARD*);
 static void do_actual(DIR_SOL*, BOARD*);
 static int get_set_size(DIR_SOL*);
-static bool set_complete(DIR_SOL*, BOARD*);
 static void get_changed_and_removed_mates(DIR_SOL*);
 static void get_added_mates(DIR_SOL*);
 static bool mate_equals(BOARD*, BOARD*);
 static bool black_equals(BOARD*, BOARD*);
+static bool is_flight_giver(BOARD*, unsigned int);
+static bool is_provided(BOARD*, BOARDLIST*);
 
 static int ChangedMates = 0;
 static int AddedMates = 0;
 static int RemovedMates = 0;
+static int UpFlights = 0;
+static int UpChecks = 0;
+static int UpFgivers = 0;
+static int UpCaps = 0;
+static int TotUp = 0;
 
 void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 {
@@ -64,7 +75,29 @@ void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 
 void do_statics(DIR_SOL* insol, BOARD* inBrd)
 {
+    BOARDLIST* bList;
+    unsigned int flights;
+    int set_count;
+    int set_full_count;
+    bool set_complete = false;
+
     start_static_class_xml();
+    bList = generateBlackBoardlist(inBrd, 1, &flights);
+
+    if (insol->set->vektor != NULL) {
+        BOARD* elt;
+
+        if (bList->vektor != NULL) {
+            LL_COUNT(insol->set->vektor, elt, set_count);
+            LL_COUNT(bList->vektor, elt, set_full_count);
+
+            set_complete = (set_count == set_full_count) ? true : false;
+        }
+    }
+
+    /*
+      * Classify type
+      */
 
     if (inBrd->check == false) {
         get_changed_and_removed_mates(insol);
@@ -79,7 +112,7 @@ void do_statics(DIR_SOL* insol, BOARD* inBrd)
             add_static_type("CHECKING_KEY");
         } else if (insol->keys->vektor->threat == NULL) {
 
-            if ((SetSize > 0) && (set_complete(insol, inBrd) == true)) {
+            if ((SetSize > 0) && (set_complete == true)) {
 
                 if (ChangedMates > 0) {
                     add_static_type("MUTATE");
@@ -90,7 +123,7 @@ void do_statics(DIR_SOL* insol, BOARD* inBrd)
                 add_static_type("INCOMPLETE_BLOCK");
             }
         } else {
-            if ((SetSize > 0) && (set_complete(insol, inBrd) == true)) {
+            if ((SetSize > 0) && (set_complete == true)) {
                 add_static_type("BLOCK_THREAT");
             } else {
                 add_static_type("THREAT");
@@ -101,9 +134,77 @@ void do_statics(DIR_SOL* insol, BOARD* inBrd)
         add_static_type("WHITE_IN_CHECK");
     }
 
+    /*
+      * Count strong unprovided moves.
+      */
+
+    {
+        BOARD* elt;
+        BOARDLIST* sets = insol->set;
+
+        LL_FOREACH(bList->vektor, elt) {
+
+            if (elt->mover == KING) {
+                if (is_provided(elt, sets) == false) {
+                    UpFlights++;
+                    TotUp++;
+                }
+            } else if (elt->check == true) {
+                if (is_provided(elt, sets) == false) {
+                    UpChecks++;
+                    TotUp++;
+                }
+            } else if (elt->captured == true) {
+                if (is_provided(elt, sets) == false) {
+                    UpCaps++;
+                    TotUp++;
+                }
+            } else if (is_flight_giver(elt, flights) == true) {
+                if (is_provided(elt, sets) == false) {
+                    UpFgivers++;
+                    TotUp++;
+                }
+            }
+        }
+    }
+
+    add_up_flights(UpFlights);
+    add_up_checks(UpChecks);
+    add_up_fgivers(UpFgivers);
+    add_up_caps(UpCaps);
+    add_tot_up(TotUp);
+
     end_static_clas_xml();
 
+    freeBoardlist(bList);
+
     return;
+}
+
+bool is_provided(BOARD* inBrd, BOARDLIST* sets)
+{
+    BOARD* elt;
+    bool rc = false;
+
+    LL_FOREACH(sets->vektor, elt) {
+
+        if ((inBrd->from == elt->from) && (inBrd->to == elt->to)) {
+            rc = true;
+            break;
+        }
+    }
+
+    return rc;
+}
+
+bool is_flight_giver(BOARD* inBrd, unsigned int inFlights)
+{
+    unsigned int flights;
+
+    BOARDLIST* bList = generateBlackBoardlist(inBrd, 1, &flights);
+    freeBoardlist(bList);
+
+    return (flights > inFlights) ? true : false;
 }
 
 int get_set_size(DIR_SOL* insol)
@@ -113,30 +214,6 @@ int get_set_size(DIR_SOL* insol)
 
     if (insol->set->vektor != NULL) {
         LL_COUNT(insol->set->vektor, elt, rc);
-    }
-
-    return rc;
-}
-
-bool set_complete(DIR_SOL* insol, BOARD* inBrd)
-{
-    bool rc = false;
-
-    if (insol->set->vektor != NULL) {
-        BOARD* elt;
-        unsigned int flights;
-        int set_count;
-        int set_full_count;
-        BOARDLIST* bList = generateBlackBoardlist(inBrd, 1, &flights);
-
-        if (bList->vektor != NULL) {
-            LL_COUNT(insol->set->vektor, elt, set_count);
-            LL_COUNT(bList->vektor, elt, set_full_count);
-
-            rc = (set_count == set_full_count) ? true : false;
-        }
-
-        freeBoardlist(bList);
     }
 
     return rc;

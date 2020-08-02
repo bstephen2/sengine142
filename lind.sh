@@ -6,8 +6,7 @@
 					--stip=# \
 					--actual \
 					--set \
-					--fleck \
-					--meson \
-					--classify
+					--tries \
+					--fleck | kfilter
 echo "Return Code = $?"
 exit 0

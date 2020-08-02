@@ -132,6 +132,86 @@ void add_changed(int inInt)
     return;
 }
 
+void add_up_flights(int inInt)
+{
+    UT_string* s;
+
+    utstring_new(s);
+
+    (void) genxStartElementLiteral(w, NULL, up_flights);
+    utstring_printf(s, "%d", inInt);
+    (void) genxAddText(w, (unsigned char*) utstring_body(s));
+    (void) genxEndElement(w);
+
+    utstring_free(s);
+
+    return;
+}
+
+void add_up_checks(int inInt)
+{
+    UT_string* s;
+
+    utstring_new(s);
+
+    (void) genxStartElementLiteral(w, NULL, up_checks);
+    utstring_printf(s, "%d", inInt);
+    (void) genxAddText(w, (unsigned char*) utstring_body(s));
+    (void) genxEndElement(w);
+
+    utstring_free(s);
+
+    return;
+}
+
+void add_up_fgivers(int inInt)
+{
+    UT_string* s;
+
+    utstring_new(s);
+
+    (void) genxStartElementLiteral(w, NULL, up_fgivers);
+    utstring_printf(s, "%d", inInt);
+    (void) genxAddText(w, (unsigned char*) utstring_body(s));
+    (void) genxEndElement(w);
+
+    utstring_free(s);
+
+    return;
+}
+
+void add_up_caps(int inInt)
+{
+    UT_string* s;
+
+    utstring_new(s);
+
+    (void) genxStartElementLiteral(w, NULL, up_caps);
+    utstring_printf(s, "%d", inInt);
+    (void) genxAddText(w, (unsigned char*) utstring_body(s));
+    (void) genxEndElement(w);
+
+    utstring_free(s);
+
+    return;
+}
+
+void add_tot_up(int inInt)
+{
+    UT_string* s;
+
+    utstring_new(s);
+
+    (void) genxStartElementLiteral(w, NULL, tot_up);
+    utstring_printf(s, "%d", inInt);
+    (void) genxAddText(w, (unsigned char*) utstring_body(s));
+    (void) genxEndElement(w);
+
+    utstring_free(s);
+
+    return;
+}
+
 void add_static_type(char* in_type)
 {
     (void) genxStartElementLiteral(w, NULL, type);

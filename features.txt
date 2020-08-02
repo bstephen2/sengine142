@@ -1,0 +1,42 @@
+Classification Features
+
+Each key or try is of the pattern:
+
+[KQRBSP];(FEATURE,)*
+
+Each variation is a combination of features in the pattern:
+
+[KQRBSP];(FEATURE,)*:[KQRBSP];MATE_FEATURE with FEATUREs in alphabetical order
+
+FEATURE can be any of:
+
+P-GUARD(n) of squares in the black king field
+N-GUARD(n) of squares in the black king field
+CHECK
+CAPTURE([KQRBSP]
+CASTLES
+EP
+P-PIN([KQRBSP])
+N-PIN([KQRBSP])
+P_SPIN([KQRBSP])
+N_SPIN([KQRBSP])
+P_CUT([KQRBSP])
+N_CUT([KQRBSP])
+P_SCUT([KQRBSP])
+N_SCUT([KQRBSP])
+P-FLIGHT
+S-FLIGHT
+
+MATE_FEATURE can be only one of:
+([QRB]-[KRBSP])BAT(EP)*
+([QRB]-[KRBSP])IND_BAT(EP)*
+[KBS]
+P(EP)*
+QAB
+QAB1
+QAR
+QAR1
+R
+R1
+
+Each distinct variation is listed only once.
