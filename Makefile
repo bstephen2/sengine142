@@ -22,9 +22,9 @@ GXMODS	=	genx.c charprops.c
 GXOBJS	=	genx.o charprops.o
 CHDS	=	sengine.h options.h
 CMODS	=	main.c options.c init.c board.c direct.c dir_xml.c boardlist.c \
-			memory.c pool.c cldir2.c dir2_class_xml.c
+			memory.c pool.c cldir2.c dir2_class_xml.c class_util.c
 COBJS	=	main.o options.o init.o board.o direct.o dir_xml.o boardlist.o \
-			memory.o pool.o cldir2.o dir2_class_xml.o
+			memory.o pool.o cldir2.o dir2_class_xml.o class_util.o
 CASMS	=	main.asm options.asm init.asm board.asm direct.asm dir_xml.asm \
 			boardlist.asm memory.asm pool.asm cldir2.asm dir2_class_xml.asm \
 			genx.asm charprops.asm md5.asm
@@ -33,43 +33,47 @@ sengine:	${COBJS} ${MD5OBJS} ${GXOBJS}
 	${LD}   ${LDFLAGS} ${COBJS} ${MD5OBJS} ${GXOBJS}
 	cp ${EXE} ${HOME}/bin/${EXE}
 
-main.o:	main.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+main.o:	main.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} main.c
 	objconv -fnasm main.o
 
-cldir2.o:	cldir2.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+class_util.o:	class_util.c ${CHDS} ${MD5HDS} ${GXHDS}
+	${CC} ${CFLAGS} class_util.c
+	objconv -fnasm class_util.o
+
+cldir2.o:	cldir2.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} cldir2.c
 	objconv -fnasm cldir2.o
 
-dir2_class_xml.o:	dir2_class_xml.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+dir2_class_xml.o:	dir2_class_xml.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} dir2_class_xml.c
 	objconv -fnasm dir2_class_xml.o
 
-boardlist.o:	boardlist.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+boardlist.o:	boardlist.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} boardlist.c
 	objconv -fnasm boardlist.o
 
-direct.o:	direct.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+direct.o:	direct.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} direct.c
 	objconv -fnasm direct.o
 
-memory.o:	memory.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+memory.o:	memory.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} memory.c
 	objconv -fnasm memory.o
 	
-dir_xml.o:	dir_xml.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+dir_xml.o:	dir_xml.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} dir_xml.c
 	objconv -fnasm dir_xml.o
 	
-options.o:	options.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+options.o:	options.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} options.c
 	objconv -fnasm options.o
 
-init.o:	init.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+init.o:	init.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} init.c
 	objconv -fnasm init.o
 
-board.o:	board.c ${CHDS} ${KHDS} ${MD5HDS} ${GXHDS}
+board.o:	board.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} board.c
 	objconv -fnasm board.o
 	

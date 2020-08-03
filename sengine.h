@@ -150,6 +150,11 @@ typedef struct BOARD {
     struct BOARD* next;
 } BOARD;
 
+typedef struct ID_BOARD {
+    char white_ids[64];
+    char black_ids[64];
+} ID_BOARD;
+
 typedef struct HASHKEY {
     unsigned char hashkey[16];
 } HASHKEY;

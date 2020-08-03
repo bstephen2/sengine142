@@ -18,6 +18,8 @@
 
 #include "sengine.h"
 
+void setup_id_board(BOARD*, ID_BOARD*);
+
 void start_class_2_xml(void);
 void end_class_2_xml(void);
 void start_static_class_xml(void);
