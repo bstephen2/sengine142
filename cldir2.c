@@ -17,6 +17,8 @@
  */
 
 #include "sengine.h"
+#include "utarray.h"
+#include "utstring.h"
 
 void setup_id_board(BOARD*, ID_BOARD*);
 
@@ -39,11 +41,12 @@ void add_up_checks(int);
 void add_up_fgivers(int);
 void add_up_caps(int);
 void add_tot_up(int);
+void add_var(char*);
 
 static void do_statics(DIR_SOL*, BOARD*);
-static void do_sets(DIR_SOL*, BOARD*);
-static void do_virtual(DIR_SOL*, BOARD*);
-static void do_actual(DIR_SOL*, BOARD*);
+static void do_sets(DIR_SOL*, BOARD*, ID_BOARD*);
+static void do_virtual(DIR_SOL*, BOARD*, ID_BOARD*);
+static void do_actual(DIR_SOL*, BOARD*, ID_BOARD*);
 static int get_set_size(DIR_SOL*);
 static void get_changed_and_removed_mates(DIR_SOL*);
 static void get_added_mates(DIR_SOL*);
@@ -51,6 +54,7 @@ static bool mate_equals(BOARD*, BOARD*);
 static bool black_equals(BOARD*, BOARD*);
 static bool is_flight_giver(BOARD*, unsigned int);
 static bool is_provided(BOARD*, BOARDLIST*);
+static void classify_vars(BOARDLIST*, BOARD*, ID_BOARD*);
 
 static int ChangedMates = 0;
 static int AddedMates = 0;
@@ -60,15 +64,29 @@ static int UpChecks = 0;
 static int UpFgivers = 0;
 static int UpCaps = 0;
 static int TotUp = 0;
+static char pieces[] = "0PSBRQK";
 
 void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 {
+    ID_BOARD* p_init_idbd;
+
     start_class_2_xml();
 
     do_statics(insol, inBrd);
-    do_sets(insol, inBrd);
-    do_virtual(insol, inBrd);
-    do_actual(insol, inBrd);
+
+    p_init_idbd = getIdBoard();
+    setup_id_board(inBrd, p_init_idbd);
+
+#ifdef MOVESTAT
+    fprintf(stderr, "WHITE_ID => %s\n", p_init_idbd->white_ids);
+    fprintf(stderr, "BLACK_ID => %s\n", p_init_idbd->black_ids);
+#endif
+
+    do_sets(insol, inBrd, p_init_idbd);
+    do_virtual(insol, inBrd, p_init_idbd);
+    do_actual(insol, inBrd, p_init_idbd);
+
+    freeIdBoard(p_init_idbd);
 
     end_class_2_xml();
 
@@ -314,15 +332,16 @@ void get_added_mates(DIR_SOL* insol)
     return;
 }
 
-void do_sets(DIR_SOL* insol, BOARD* inBrd)
+void do_sets(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
     start_set_class_xml();
+    classify_vars(insol->set, inBrd, in_Idb);
     end_set_class_xml();
 
     return;
 }
 
-void do_virtual(DIR_SOL* insol, BOARD* inBrd)
+void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
     start_virtual_class_xml();
     end_virtual_class_xml();
@@ -330,10 +349,45 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd)
     return;
 }
 
-void do_actual(DIR_SOL* insol, BOARD* inBrd)
+void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
     start_actual_class_xml();
     end_actual_class_xml();
+
+    return;
+}
+
+void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
+{
+    BOARD* elt;
+    HASH_VAR* vars = NULL;
+    HASH_VAR* s;
+    HASH_VAR* tmp;
+
+    LL_FOREACH(blist->vektor, elt) {
+        UT_string* var;
+        utstring_new(var);
+        char piece = pieces[elt->mover];
+        char id = inIdBrd->black_ids[elt->from];
+        utstring_printf(var, "%c(%c);", piece, id);
+        HASH_FIND_STR(vars, utstring_body(var), s);
+
+        if (s == NULL) {
+            s = (HASH_VAR*) malloc(sizeof(HASH_VAR));
+            SENGINE_MEM_ASSERT(s);
+            s->class = strdup(utstring_body(var));
+            HASH_ADD_KEYPTR(hh, vars, s->class, strlen(s->class), s);
+        }
+
+        utstring_free(var);
+    }
+
+    HASH_ITER(hh, vars, s, tmp) {
+        add_var(s->class);
+        HASH_DEL(vars, s);
+        free(s->class);
+        free(s);
+    }
 
     return;
 }

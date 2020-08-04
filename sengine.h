@@ -151,9 +151,14 @@ typedef struct BOARD {
 } BOARD;
 
 typedef struct ID_BOARD {
-    char white_ids[64];
-    char black_ids[64];
+    char white_ids[65];
+    char black_ids[65];
 } ID_BOARD;
+
+typedef struct HASH_VAR {
+    char* class;
+    UT_hash_handle hh;
+} HASH_VAR;
 
 typedef struct HASHKEY {
     unsigned char hashkey[16];
@@ -206,6 +211,9 @@ BOARDLIST* getBoardlist(unsigned char, unsigned char);
 void freeBoard(BOARD*);
 void freePosition(POSITION*);
 void freeBoardlist(BOARDLIST*);
+ID_BOARD* getIdBoard();
+ID_BOARD* cloneIdBoard(ID_BOARD* inIdBrd);
+void freeIdBoard(ID_BOARD* inIdBrd);
 int do_options(int, char**);
 void init(void);
 BOARD* setup_diagram(enum COLOUR);

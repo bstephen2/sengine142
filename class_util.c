@@ -18,10 +18,41 @@
 
 #include "sengine.h"
 
+extern BITBOARD clearMask[64];
+
 static const unsigned char w_ids[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static const unsigned char b_ids[] = "abcdefghijklmnopqrstuvwxyz";
 
+int tzcount(BITBOARD inBrd);
+
 void setup_id_board(BOARD* inBrd, ID_BOARD* idBrd)
 {
+    int w = 0;
+    int b = 0;
+    BITBOARD temp;
+    int i;
+
+    temp = inBrd->pos->bitBoard[WHITE][OCCUPIED];
+
+    i = tzcount(temp);
+
+    while (i < 64) {
+        idBrd->white_ids[i] = w_ids[w];
+        w++;
+        temp &= clearMask[i];
+        i = tzcount(temp);
+    }
+
+    temp = inBrd->pos->bitBoard[BLACK][OCCUPIED];
+
+    i = tzcount(temp);
+
+    while (i < 64) {
+        idBrd->black_ids[i] = b_ids[b];
+        b++;
+        temp &= clearMask[i];
+        i = tzcount(temp);
+    }
+
     return;
 }

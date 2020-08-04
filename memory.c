@@ -23,17 +23,25 @@
 #define SENGINE_BOARD_POOL_BLOCKSIZE 5000
 #define SENGINE_HASHVALUE_POOL_BLOCKSIZE 16000
 #define SENGINE_BOARDLIST_POOL_BLOCKSIZE 5000
+#define SENGINE_IDBOARD_POOL_BLOCKSIZE 50
+
+extern bool opt_classify;
 
 static pool pos_pool_ptr;
 static pool hval_pool_ptr;
 static pool blist_pool_ptr;
 static pool board_pool_ptr;
+static pool idb_pool_ptr;
 
 void init_mem(void)
 {
     poolInitialize(&pos_pool_ptr, sizeof(POSITION), SENGINE_POSITION_POOL_BLOCKSIZE);
     poolInitialize(&blist_pool_ptr, sizeof(BOARDLIST), SENGINE_BOARDLIST_POOL_BLOCKSIZE);
     poolInitialize(&board_pool_ptr, sizeof(BOARD), SENGINE_BOARD_POOL_BLOCKSIZE);
+
+    if (opt_classify == true) {
+        poolInitialize(&idb_pool_ptr, sizeof(ID_BOARD), SENGINE_IDBOARD_POOL_BLOCKSIZE);
+    }
 
     return;
 }
@@ -43,6 +51,10 @@ void close_mem(void)
     poolFreePool(&pos_pool_ptr);
     poolFreePool(&blist_pool_ptr);
     poolFreePool(&board_pool_ptr);
+
+    if (opt_classify == true) {
+        poolFreePool(&idb_pool_ptr);
+    }
 
     return;
 }
@@ -59,10 +71,39 @@ void destroy_mpool()
     return;
 }
 
+ID_BOARD* getIdBoard()
+{
+    ID_BOARD* pidb;
+    pidb = (ID_BOARD*) poolMalloc(&idb_pool_ptr);
+    SENGINE_MEM_ASSERT(pidb);
+    memset((void*) pidb, 'Z', sizeof(ID_BOARD));
+    pidb->white_ids[64] = '\0';
+    pidb->black_ids[64] = '\0';
+
+    return pidb;
+}
+
+ID_BOARD* cloneIdBoard(ID_BOARD* inIdBrd)
+{
+    ID_BOARD* pidb;
+    pidb = (ID_BOARD*) poolMalloc(&idb_pool_ptr);
+    SENGINE_MEM_ASSERT(pidb);
+    memcpy((void*) pidb, (void*) inIdBrd, sizeof(ID_BOARD));
+
+    return pidb;
+}
+
+void freeIdBoard(ID_BOARD* inIdBrd)
+{
+    poolFree(&idb_pool_ptr, inIdBrd);
+
+    return;
+}
+
 BOARD* getBoard(POSITION* ppos, unsigned char played, unsigned char move)
 {
     BOARD* rpbrd;
-    rpbrd = calloc(1, sizeof(BOARD));
+    //rpbrd = calloc(1, sizeof(BOARD));
     rpbrd = (BOARD*) poolMalloc(&board_pool_ptr);
     SENGINE_MEM_ASSERT(rpbrd);
     memset((void*) rpbrd, 0, sizeof(BOARD));

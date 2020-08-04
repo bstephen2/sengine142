@@ -269,3 +269,12 @@ void end_actual_class_xml(void)
 
     return;
 }
+
+void add_var(char* in_var)
+{
+    (void) genxStartElementLiteral(w, NULL, var);
+    (void) genxAddText(w, (unsigned char*) in_var);
+    (void) genxEndElement(w);
+
+    return;
+}
