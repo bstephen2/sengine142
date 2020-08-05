@@ -365,23 +365,42 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
     HASH_VAR* tmp;
 
     LL_FOREACH(blist->vektor, elt) {
-        UT_string* var;
-        utstring_new(var);
-        char piece = pieces[elt->mover];
-        char id = inIdBrd->black_ids[elt->from];
-        utstring_printf(var, "%c(%c);", piece, id);
-        HASH_FIND_STR(vars, utstring_body(var), s);
 
-        if (s == NULL) {
-            s = (HASH_VAR*) malloc(sizeof(HASH_VAR));
-            SENGINE_MEM_ASSERT(s);
-            s->class = strdup(utstring_body(var));
-            HASH_ADD_KEYPTR(hh, vars, s->class, strlen(s->class), s);
+        unsigned int mates;
+        BOARD* m;
+        LL_COUNT(elt->nextply->vektor, m, mates);
+
+        // Don't bother with dualled variations
+        if (mates == 1) {
+            UT_string* var;
+            utstring_new(var);
+
+            // Identify black mover and add to var.
+
+            char piece = pieces[elt->mover];
+            char id = inIdBrd->black_ids[elt->from];
+            utstring_printf(var, "%c(%c);", piece, id);
+				
+				// Identify black features
+				// Sort black features
+				// Add black features to var
+				// Identify white mover and mate details and add to var
+
+            // Add var classification if unique so far.
+            HASH_FIND_STR(vars, utstring_body(var), s);
+
+            if (s == NULL) {
+                s = (HASH_VAR*) malloc(sizeof(HASH_VAR));
+                SENGINE_MEM_ASSERT(s);
+                s->class = strdup(utstring_body(var));
+                HASH_ADD_KEYPTR(hh, vars, s->class, strlen(s->class), s);
+            }
+
+            utstring_free(var);
         }
-
-        utstring_free(var);
     }
 
+    // Add var classifications to xml and free from uthash.
     HASH_ITER(hh, vars, s, tmp) {
         add_var(s->class);
         HASH_DEL(vars, s);
