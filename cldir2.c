@@ -66,6 +66,13 @@ static int UpCaps = 0;
 static int TotUp = 0;
 static char pieces[] = "0PSBRQK";
 
+int featsort(const void* a, const void* b)
+{
+    char* aa = (char*) a;
+    char* bb = (char*) b;
+
+    return strcmp(aa, bb);
+}
 void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 {
     ID_BOARD* p_init_idbd;
@@ -372,19 +379,52 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
         // Don't bother with dualled variations
         if (mates == 1) {
+            UT_array* bfeats;
             UT_string* var;
+            UT_string* bfeat;
+            char** p;
             utstring_new(var);
+            utarray_new(bfeats, &ut_str_icd);
 
             // Identify black mover and add to var.
 
             char piece = pieces[elt->mover];
             char id = inIdBrd->black_ids[elt->from];
             utstring_printf(var, "%c(%c);", piece, id);
-				
-				// Identify black features
-				// Sort black features
-				// Add black features to var
-				// Identify white mover and mate details and add to var
+
+            // Identify black features
+            utstring_new(bfeat);
+            //CHECK
+
+            if (elt->check == true) {
+                char* s = "CHECK";
+                utarray_push_back(bfeats, &s);
+            }
+
+            //CAPTURE([QRBSP]
+            //CASTLES
+            //EP
+            //P-PIN([KQRBSP])
+            //N-PIN([KQRBSP])
+            //P_SPIN([KQRBSP])
+            //N_SPIN([KQRBSP])
+            //P_CUT([KQRBSP])
+            //N_CUT([KQRBSP])
+            //P_SCUT([KQRBSP])
+            //N_SCUT([KQRBSP])
+            //P-FLIGHT
+            //S-FLIGHT
+
+            // Sort black features
+            utarray_sort(bfeats, featsort);
+            // Add black features to var
+            p = NULL;
+
+            while ((p = (char**)utarray_next(bfeats, p))) {
+                utstring_printf(var, "%s,", *p);
+            }
+
+            // Identify white mover and mate details and add to var
 
             // Add var classification if unique so far.
             HASH_FIND_STR(vars, utstring_body(var), s);
@@ -397,6 +437,8 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             }
 
             utstring_free(var);
+            utstring_free(bfeat);
+            utarray_free(bfeats);
         }
     }
 
