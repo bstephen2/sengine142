@@ -42,6 +42,7 @@ void add_up_fgivers(int);
 void add_up_caps(int);
 void add_tot_up(int);
 void add_var(char*);
+char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 
 static void do_statics(DIR_SOL*, BOARD*);
 static void do_sets(DIR_SOL*, BOARD*, ID_BOARD*);
@@ -68,10 +69,14 @@ static char pieces[] = "0PSBRQK";
 
 int featsort(const void* a, const void* b)
 {
-    char* aa = (char*) a;
-    char* bb = (char*) b;
+    char** aa = (char**) a;
+    char** bb = (char**) b;
 
-    return strcmp(aa, bb);
+#ifdef MOVESTAT
+    fprintf(stderr, "%s\n%s\n\n", *aa, *bb);
+#endif
+
+    return strcmp(*aa, *bb);
 }
 void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 {
@@ -394,15 +399,26 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
             // Identify black features
             utstring_new(bfeat);
-            //CHECK
 
             if (elt->check == true) {
+                //CHECK
                 char* s = "CHECK";
                 utarray_push_back(bfeats, &s);
             }
 
-            //CAPTURE([QRBSP]
-            //CASTLES
+            if (elt->captured == true) {
+                //CAPTURE[QRBSP](id)
+                UT_string* capstr;
+                utstring_new(capstr);
+                char cid = inIdBrd->white_ids[elt->to];
+                char pid = get_piece_type(WHITE, inBrd, elt->to);
+                utstring_printf(capstr, "CAP%c(%c)", pid, cid);
+                utarray_push_back(bfeats, &(utstring_body(capstr)));
+                utstring_free(capstr);
+            }
+
+            //CASTK
+            //CASTQ
             //EP
             //P-PIN([KQRBSP])
             //N-PIN([KQRBSP])
@@ -412,8 +428,15 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             //N_CUT([KQRBSP])
             //P_SCUT([KQRBSP])
             //N_SCUT([KQRBSP])
-            //P-FLIGHT
-            //S-FLIGHT
+            //P-GUARD of mating square(s)
+            //N-GUARD of mating square(s)
+            //F-GIVER(n)
+            //F_TAKER(n)
+
+            if (elt->mover == KING) {
+                //P-FLIGHT
+                //S-FLIGHT
+            }
 
             // Sort black features
             utarray_sort(bfeats, featsort);

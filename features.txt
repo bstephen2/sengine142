@@ -8,13 +8,16 @@ Each variation is a combination of features in the pattern:
 
 [KQRBSP];(FEATURE,)*:[KQRBSP];MATE_FEATURE with FEATUREs in alphabetical order
 
-FEATURE can be any of:
+FEATURE can be any combination of:
 
-P-GUARD(n) of squares in the black king field
-N-GUARD(n) of squares in the black king field
+P-GUARD of mating square(s)
+N-GUARD of mating square(s)
+F-GIVER(n)
+F_TAKER(n)
 CHECK
-CAPTURE([KQRBSP]
-CASTLES
+CAP[QRBSP](id)
+CASTK
+CASTQ
 EP
 P-PIN([KQRBSP])
 N-PIN([KQRBSP])
@@ -27,7 +30,7 @@ N_SCUT([KQRBSP])
 P-FLIGHT
 S-FLIGHT
 
-MATE_FEATURE can be only one of:
+MATE_FEATURE can be only one of the following with any appropriate FEATUREs.
 ([QRB]-[KRBSP])BAT(EP)*
 ([QRB]-[KRBSP])IND_BAT(EP)*
 ([QRBSP]-[QRBSP])DCHECK

@@ -22,6 +22,7 @@ extern BITBOARD clearMask[64];
 
 static const unsigned char w_ids[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static const unsigned char b_ids[] = "abcdefghijklmnopqrstuvwxyz";
+static char pieces[] = "0PSBRQK";
 
 int tzcount(BITBOARD inBrd);
 
@@ -55,4 +56,30 @@ void setup_id_board(BOARD* inBrd, ID_BOARD* idBrd)
     }
 
     return;
+}
+
+char get_piece_type(enum COLOUR col, BOARD* inBrd, unsigned char to)
+{
+    BITBOARD temp;
+    enum PIECE ep;
+    int i;
+    int ito = (int) to;
+    POSITION* pos = inBrd->pos;
+
+    for (ep = PAWN; ep <= QUEEN; ep++) {
+        temp = pos->bitBoard[col][ep];
+        i = tzcount(temp);
+
+        while (i < 64) {
+
+            if (i == ito) {
+                return pieces[ep];
+            }
+
+            temp &= clearMask[i];
+            i = tzcount(temp);
+        }
+    }
+
+    return 'X';
 }
