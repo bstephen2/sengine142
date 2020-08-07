@@ -278,3 +278,43 @@ void add_var(char* in_var)
 
     return;
 }
+
+void start_try()
+{
+    (void) genxStartElementLiteral(w, NULL, try);
+
+    return;
+}
+
+void end_try()
+{
+    (void) genxEndElement(w);
+
+    return;
+}
+
+void add_key(char* in_key)
+{
+    (void) genxStartElementLiteral(w, NULL, key);
+    (void) genxAddText(w, (unsigned char*) in_key);
+    (void) genxEndElement(w);
+
+    return;
+}
+void add_threat(char* in_thr)
+{
+    (void) genxStartElementLiteral(w, NULL, thr);
+    (void) genxAddText(w, (unsigned char*) in_thr);
+    (void) genxEndElement(w);
+
+    return;
+}
+
+void add_refut(char* in_refut)
+{
+    (void) genxStartElementLiteral(w, NULL, refut);
+    (void) genxAddText(w, (unsigned char*) in_refut);
+    (void) genxEndElement(w);
+
+    return;
+}

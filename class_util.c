@@ -58,6 +58,15 @@ void setup_id_board(BOARD* inBrd, ID_BOARD* idBrd)
     return;
 }
 
+void update_id_board(enum COLOUR colour, BOARD* inBrd, ID_BOARD* inId, ID_BOARD* outId)
+{
+    if (colour == WHITE) {
+    } else if (colour == BLACK) {
+    }
+
+    return;
+}
+
 char get_piece_type(enum COLOUR col, BOARD* inBrd, unsigned char to)
 {
     BITBOARD temp;

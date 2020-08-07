@@ -42,7 +42,13 @@ void add_up_fgivers(int);
 void add_up_caps(int);
 void add_tot_up(int);
 void add_var(char*);
+void start_try();
+void end_try();
+void add_key(char*);
+void add_threat(char*);
+void add_refut(char*);
 char get_piece_type(enum COLOUR, BOARD*, unsigned char);
+void update_id_board(enum COLOUR, BOARD*, ID_BOARD*, ID_BOARD*);
 
 static void do_statics(DIR_SOL*, BOARD*);
 static void do_sets(DIR_SOL*, BOARD*, ID_BOARD*);
@@ -355,7 +361,16 @@ void do_sets(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
 void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
+    BOARDLIST* tries = insol->tries;
+    BOARD* elt;
+
     start_virtual_class_xml();
+
+    LL_FOREACH(tries->vektor, elt) {
+        start_try();
+        end_try();
+    }
+
     end_virtual_class_xml();
 
     return;
@@ -388,6 +403,8 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             UT_string* var;
             UT_string* bfeat;
             char** p;
+            ID_BOARD* bmIdBoard = cloneIdBoard(inIdBrd);
+            update_id_board(BLACK, elt, inIdBrd, bmIdBoard);
             utstring_new(var);
             utarray_new(bfeats, &ut_str_icd);
 
@@ -441,10 +458,18 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             // Sort black features
             utarray_sort(bfeats, featsort);
             // Add black features to var
+            unsigned int bf = utarray_len(bfeats);
+            unsigned int bfc = 0;
             p = NULL;
 
             while ((p = (char**)utarray_next(bfeats, p))) {
-                utstring_printf(var, "%s,", *p);
+                bfc++;
+
+                if (bfc == bf) {
+                    utstring_printf(var, "%s", *p);
+                } else {
+                    utstring_printf(var, "%s,", *p);
+                }
             }
 
             // Identify white mover and mate details and add to var
@@ -462,6 +487,7 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             utstring_free(var);
             utstring_free(bfeat);
             utarray_free(bfeats);
+            freeIdBoard(bmIdBoard);
         }
     }
 
