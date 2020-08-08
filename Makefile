@@ -94,7 +94,7 @@ pool.o:	pool.c pool.h
 	objconv -fnasm pool.o
 	
 clean:
-	rm ${COBJS} ${CASMS} ${MD5OBJS} ${GXOBJS} ${EXE}  *orig
+	rm ${COBJS} ${CASMS} ${MD5OBJS} ${GXOBJS} ${EXE}  *orig *xml sol.txt
 
 tidy:
 	${IND} ${INDOPTS} ${CMODS} ${CHDS}

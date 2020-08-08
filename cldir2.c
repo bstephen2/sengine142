@@ -62,6 +62,8 @@ static bool black_equals(BOARD*, BOARD*);
 static bool is_flight_giver(BOARD*, unsigned int);
 static bool is_provided(BOARD*, BOARDLIST*);
 static void classify_vars(BOARDLIST*, BOARD*, ID_BOARD*);
+static UT_string* get_mate_class(BOARD*, ID_BOARD*);
+static void classify_white_move(BOARD*, ID_BOARD*);
 
 static int ChangedMates = 0;
 static int AddedMates = 0;
@@ -368,6 +370,11 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
     LL_FOREACH(tries->vektor, elt) {
         start_try();
+        classify_white_move(elt, in_Idb);
+        ID_BOARD* newIB = cloneIdBoard(in_Idb);
+        update_id_board(WHITE, elt, in_Idb, newIB);
+        //classify_vars(elt->nextply, elt, newIB);
+        freeIdBoard(newIB);
         end_try();
     }
 
@@ -378,8 +385,21 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
 void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
+    BOARD* wkey = insol->keys->vektor;
     start_actual_class_xml();
+    classify_white_move(wkey, in_Idb);
+    ID_BOARD* newIB = cloneIdBoard(in_Idb);
+    update_id_board(WHITE, wkey, in_Idb, newIB);
+    classify_vars(wkey->nextply, wkey, newIB);
+    freeIdBoard(newIB);
     end_actual_class_xml();
+
+    return;
+}
+
+void classify_white_move(BOARD* wm, ID_BOARD* inIdBrd)
+{
+    add_key("Dummy key");
 
     return;
 }
@@ -474,6 +494,10 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
             // Identify white mover and mate details and add to var
 
+            UT_string* wm = get_mate_class(elt->nextply->vektor, bmIdBoard);
+            utstring_concat(var, wm);
+            utstring_free(wm);
+
             // Add var classification if unique so far.
             HASH_FIND_STR(vars, utstring_body(var), s);
 
@@ -500,6 +524,16 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
     }
 
     return;
+}
+
+UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
+{
+    UT_string* s;
+    char colon = ':';
+    utstring_new(s);
+    utstring_printf(s, "%c", colon);
+
+    return s;
 }
 
 bool mate_equals(BOARD* brda, BOARD* brdb)

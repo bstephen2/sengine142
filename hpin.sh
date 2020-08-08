@@ -6,9 +6,12 @@ sengine142	--kings=c1a1 \
 				--stip=# \
 				--actual \
 				--set \
+				--tries \
 				--fleck \
-				--meson \
-				--classify | grep "MesonClass" > temp.xml
-pretty.pl temp.xml > hpin.xml
-cat hpin.xml
+				--classify > temp.xml
+grep "MesonClass" temp.xml > temp1.xml
+grep "MesonSolution" temp.xml > temp2.xml
+kfilter < temp2.xml > sol.txt
+pretty.pl temp1.xml > class.xml
+cat class.xml
 exit 0
