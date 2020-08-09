@@ -25,7 +25,7 @@ my $pp       = XML::LibXML::PrettyPrint->new(
     indent_string => '    ',
     element       => {
         compact => [
-            qw/Var Key Tot_Up Up_Caps Up_Checks Up_Fgivers Up_Flights Type Changed Added Removed/
+            qw/Var Refut Key Tot_Up Up_Caps Up_Checks Up_Fgivers Up_Flights Type Changed Added Removed/
         ],
     }
 );

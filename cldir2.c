@@ -19,6 +19,7 @@
 #include "sengine.h"
 #include "utarray.h"
 #include "utstring.h"
+#undef NDEBUG
 
 void setup_id_board(BOARD*, ID_BOARD*);
 
@@ -354,6 +355,9 @@ void get_added_mates(DIR_SOL* insol)
 
 void do_sets(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
+#ifndef NDEBUG
+    fputs("do_sets()\n", stderr);
+#endif
     start_set_class_xml();
     classify_vars(insol->set, inBrd, in_Idb);
     end_set_class_xml();
@@ -363,6 +367,9 @@ void do_sets(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
 void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
+#ifndef NDEBUG
+    fputs("do_virtual()\n", stderr);
+#endif
     BOARDLIST* tries = insol->tries;
     BOARD* elt;
 
@@ -373,7 +380,7 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
         classify_white_move(elt, in_Idb);
         ID_BOARD* newIB = cloneIdBoard(in_Idb);
         update_id_board(WHITE, elt, in_Idb, newIB);
-        //classify_vars(elt->nextply, elt, newIB);
+        classify_vars(elt->nextply, elt, newIB);
         freeIdBoard(newIB);
         end_try();
     }
@@ -385,6 +392,9 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
 void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
+#ifndef NDEBUG
+    fputs("do_actual()\n", stderr);
+#endif
     BOARD* wkey = insol->keys->vektor;
     start_actual_class_xml();
     classify_white_move(wkey, in_Idb);
@@ -403,22 +413,38 @@ void classify_white_move(BOARD* wm, ID_BOARD* inIdBrd)
 
     return;
 }
-
 void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 {
+#ifndef NDEBUG
+    fputs("classify_vars()\n", stderr);
+#endif
+
+    assert(bList != NULL);
+    assert(inBrd != NULL);
+    assert(inIdBrd != NULL);
+
     BOARD* elt;
     HASH_VAR* vars = NULL;
     HASH_VAR* s;
     HASH_VAR* tmp;
+    UT_string* refut;
+    utstring_new(refut);
 
     LL_FOREACH(blist->vektor, elt) {
-
         unsigned int mates;
         BOARD* m;
-        LL_COUNT(elt->nextply->vektor, m, mates);
+
+        if (elt->nextply != NULL) {
+            LL_COUNT(elt->nextply->vektor, m, mates);
+        } else {
+            mates = 0;
+        }
 
         // Don't bother with dualled variations
-        if (mates == 1) {
+        if (mates <= 1) {
+#ifndef NDEBUG
+            fprintf(stderr, "VAR: mates = %d\n", mates);
+#endif
             UT_array* bfeats;
             UT_string* var;
             UT_string* bfeat;
@@ -494,18 +520,22 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
             // Identify white mover and mate details and add to var
 
-            UT_string* wm = get_mate_class(elt->nextply->vektor, bmIdBoard);
-            utstring_concat(var, wm);
-            utstring_free(wm);
+            if (mates == 1) {
+                UT_string* wm = get_mate_class(elt->nextply->vektor, bmIdBoard);
+                utstring_concat(var, wm);
+                utstring_free(wm);
 
-            // Add var classification if unique so far.
-            HASH_FIND_STR(vars, utstring_body(var), s);
+                // Add var classification if unique so far.
+                HASH_FIND_STR(vars, utstring_body(var), s);
 
-            if (s == NULL) {
-                s = (HASH_VAR*) malloc(sizeof(HASH_VAR));
-                SENGINE_MEM_ASSERT(s);
-                s->class = strdup(utstring_body(var));
-                HASH_ADD_KEYPTR(hh, vars, s->class, strlen(s->class), s);
+                if (s == NULL) {
+                    s = (HASH_VAR*) malloc(sizeof(HASH_VAR));
+                    SENGINE_MEM_ASSERT(s);
+                    s->class = strdup(utstring_body(var));
+                    HASH_ADD_KEYPTR(hh, vars, s->class, strlen(s->class), s);
+                }
+            } else {
+                utstring_concat(refut, var);
             }
 
             utstring_free(var);
@@ -522,6 +552,12 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
         free(s->class);
         free(s);
     }
+
+    if (utstring_len(refut) > 0) {
+        add_refut(utstring_body(refut));
+    }
+
+    utstring_free(refut);
 
     return;
 }

@@ -15,4 +15,3 @@ kfilter < temp2.xml > sol.txt
 pretty.pl temp1.xml > class.xml
 cat class.xml
 exit 0
-exit 0

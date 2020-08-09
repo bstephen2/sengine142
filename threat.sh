@@ -6,6 +6,7 @@
 					--stip=# \
 					--actual \
 					--set \
+					--tries \
 					--fleck \
 					--meson \
 					--classify
