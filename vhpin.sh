@@ -6,6 +6,7 @@ valgrind --leak-check=full \
 					--moves=2 \
 					--stip=# \
 					--actual \
+					--tries \
 					--set \
 					--fleck \
 					--meson \

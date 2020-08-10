@@ -63,6 +63,8 @@ void update_id_board(enum COLOUR colour, BOARD* inBrd, ID_BOARD* inId, ID_BOARD*
 {
     if (colour == WHITE) {
         if (inBrd->ep == true) {
+            outId->white_ids[inBrd->to + 8] = outId->white_ids[inBrd->from];
+            outId->white_ids[inBrd->from] = 'Z';
         } else if ((inBrd->mover == KING) && (inBrd->from == 4) && (inBrd->to == 6)) {
             // White king-side castling
             outId->white_ids[6] = outId->white_ids[4];
@@ -71,29 +73,31 @@ void update_id_board(enum COLOUR colour, BOARD* inBrd, ID_BOARD* inId, ID_BOARD*
             outId->white_ids[7] = 'Z';
         } else if ((inBrd->mover == KING) && (inBrd->from == 4) && (inBrd->to == 2)) {
             // White queen-side castling
-			  outId->white_ids[2] = outId->white_ids[4];
-			  outId->white_ids[4] = 'Z';
-			  outId->white_ids[3] = outId->white_ids[0];
-			  outId->white_ids[0] = 'Z';
-		  } else {
+            outId->white_ids[2] = outId->white_ids[4];
+            outId->white_ids[4] = 'Z';
+            outId->white_ids[3] = outId->white_ids[0];
+            outId->white_ids[0] = 'Z';
+        } else {
             outId->white_ids[inBrd->to] = outId->white_ids[inBrd->from];
             outId->white_ids[inBrd->from] = 'Z';
         }
     } else if (colour == BLACK) {
         if (inBrd->ep == true) {
+            outId->black_ids[inBrd->to - 8] = outId->black_ids[inBrd->from];
+            outId->black_ids[inBrd->from] = 'Z';
         } else if ((inBrd->mover == KING) && (inBrd->from == 60) && (inBrd->to == 62)) {
             // Black king-side castling
-			  outId->black_ids[62] = outId->black_ids[60];
-			  outId->black_ids[60] = 'Z';
-			  outId->black_ids[61] = outId->black_ids[63];
-			  outId->black_ids[63] = 'Z';
-		  } else if ((inBrd->mover == KING) && (inBrd->from == 60) && (inBrd->to == 58)) {
+            outId->black_ids[62] = outId->black_ids[60];
+            outId->black_ids[60] = 'Z';
+            outId->black_ids[61] = outId->black_ids[63];
+            outId->black_ids[63] = 'Z';
+        } else if ((inBrd->mover == KING) && (inBrd->from == 60) && (inBrd->to == 58)) {
             // Black queen-side castling
-			  outId->black_ids[58] = outId->black_ids[60];
-			  outId->black_ids[60] = 'Z';
-			  outId->black_ids[59] = outId->black_ids[56];
-			  outId->black_ids[56] = 'Z';
-		  } else {
+            outId->black_ids[58] = outId->black_ids[60];
+            outId->black_ids[60] = 'Z';
+            outId->black_ids[59] = outId->black_ids[56];
+            outId->black_ids[56] = 'Z';
+        } else {
             outId->black_ids[inBrd->to] = outId->black_ids[inBrd->from];
             outId->black_ids[inBrd->from] = 'Z';
         }

@@ -409,7 +409,95 @@ void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
 void classify_white_move(BOARD* wm, ID_BOARD* inIdBrd)
 {
-    add_key("Dummy key");
+#ifndef NDEBUG
+    fputs("classify_white_move()\n", stderr);
+#endif
+    UT_string* var;
+    UT_array* wfeats;
+    UT_string* wfeat;
+    char** p;
+
+    utstring_new(var);
+    utstring_new(wfeat);
+    utarray_new(wfeats, &ut_str_icd);
+
+    char piece = pieces[wm->mover];
+    char id = inIdBrd->white_ids[wm->from];
+    utstring_printf(var, "%c(%c);", piece, id);
+
+    if (wm->check == true) {
+        //CHECK
+        char* s = "CHECK";
+        utarray_push_back(wfeats, &s);
+    }
+
+    if (wm->captured == true) {
+        //CAPTURE[QRBSP](id)
+        UT_string* capstr;
+        utstring_new(capstr);
+        char cid = inIdBrd->black_ids[wm->to];
+        char pid = get_piece_type(BLACK, wm, wm->to);
+        utstring_printf(capstr, "CAP%c(%c)", pid, cid);
+        utarray_push_back(wfeats, &(utstring_body(capstr)));
+        utstring_free(capstr);
+    }
+
+    //EP
+    //P-PIN([KQRBSP])
+    //N-PIN([KQRBSP])
+    //P_SPIN([KQRBSP])
+    //N_SPIN([KQRBSP])
+    //P_CUT([KQRBSP])
+    //N_CUT([KQRBSP])
+    //P_SCUT([KQRBSP])
+    //N_SCUT([KQRBSP])
+    //P-GUARD of mating square(s)
+    //N-GUARD of mating square(s)
+    //F-GIVER(n)
+    //F_TAKER(n)
+
+    if (wm->mover == KING) {
+        char* ck = "CASTK";
+        char* cq = "CASTQ";
+        char* p = "P-FLIGHT";
+        char* s = "S_FLIGHT";
+        int diff;
+
+        diff = abs(wm->from - wm->to);
+
+        if ((diff == 8) || (diff == 1)) {
+            utarray_push_back(wfeats, &p);
+        } else if ((diff == 7) || (diff == 9)) {
+            utarray_push_back(wfeats, &s);
+        } else if ((wm->from == 4) && (wm->to == 6)) {
+            utarray_push_back(wfeats, &ck);
+        } else if ((wm->from == 4) && (wm->to == 2)) {
+            utarray_push_back(wfeats, &cq);
+        }
+    }
+
+    utarray_sort(wfeats, featsort);
+    // Add white features to var
+    unsigned int bf = utarray_len(wfeats);
+    unsigned int bfc = 0;
+    p = NULL;
+
+    while ((p = (char**)utarray_next(wfeats, p))) {
+        bfc++;
+
+        if (bfc == bf) {
+            utstring_printf(var, "%s", *p);
+        } else {
+            utstring_printf(var, "%s,", *p);
+        }
+    }
+
+
+    add_key(utstring_body(var));
+
+    utstring_free(var);
+    utstring_free(wfeat);
+    utarray_free(wfeats);
 
     return;
 }
@@ -480,8 +568,6 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
                 utstring_free(capstr);
             }
 
-            //CASTK
-            //CASTQ
             //EP
             //P-PIN([KQRBSP])
             //N-PIN([KQRBSP])
@@ -497,8 +583,23 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             //F_TAKER(n)
 
             if (elt->mover == KING) {
-                //P-FLIGHT
-                //S-FLIGHT
+                char* ck = "CASTK";
+                char* cq = "CASTQ";
+                char* p = "P-FLIGHT";
+                char* s = "S_FLIGHT";
+                int diff;
+
+                diff = abs(elt->from - elt->to);
+
+                if ((diff == 8) || (diff == 1)) {
+                    utarray_push_back(bfeats, &p);
+                } else if ((diff == 7) || (diff == 9)) {
+                    utarray_push_back(bfeats, &s);
+                } else if ((elt->from == 60) && (elt->to == 62)) {
+                    utarray_push_back(bfeats, &ck);
+                } else if ((elt->from == 60) && (elt->to == 58)) {
+                    utarray_push_back(bfeats, &cq);
+                }
             }
 
             // Sort black features
