@@ -65,6 +65,7 @@ static bool is_provided(BOARD*, BOARDLIST*);
 static void classify_vars(BOARDLIST*, BOARD*, ID_BOARD*);
 static UT_string* get_mate_class(BOARD*, ID_BOARD*);
 static void classify_white_move(BOARD*, ID_BOARD*);
+static void classify_threats(BOARDLIST*, ID_BOARD*);
 
 static int ChangedMates = 0;
 static int AddedMates = 0;
@@ -75,6 +76,11 @@ static int UpFgivers = 0;
 static int UpCaps = 0;
 static int TotUp = 0;
 static char pieces[] = "0PSBRQK";
+static char* lab_check = "CHECK";
+static char* lab_kcast = "0-0";
+static char* lab_qcast = "0-0-0";
+static char* lab_p_flight = "P-FLIGHT";
+static char* lab_s_flight = "S_FLIGHT";
 
 int featsort(const void* a, const void* b)
 {
@@ -380,6 +386,11 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
         classify_white_move(elt, in_Idb);
         ID_BOARD* newIB = cloneIdBoard(in_Idb);
         update_id_board(WHITE, elt, in_Idb, newIB);
+
+        if (elt->threat != NULL) {
+            classify_threats(elt->threat, newIB);
+        }
+
         classify_vars(elt->nextply, elt, newIB);
         freeIdBoard(newIB);
         end_try();
@@ -400,9 +411,39 @@ void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
     classify_white_move(wkey, in_Idb);
     ID_BOARD* newIB = cloneIdBoard(in_Idb);
     update_id_board(WHITE, wkey, in_Idb, newIB);
+
+    if (wkey->threat != NULL) {
+        classify_threats(wkey->threat, newIB);
+    }
+
     classify_vars(wkey->nextply, wkey, newIB);
     freeIdBoard(newIB);
     end_actual_class_xml();
+
+    return;
+}
+
+void classify_threats(BOARDLIST* threats, ID_BOARD* in_Idb)
+{
+#ifndef NDEBUG
+    fputs("classify_threats()\n", stderr);
+#endif
+    unsigned int count;
+    BOARD* elt;
+
+    LL_COUNT(threats->vektor, elt, count);
+
+    if (count == 1) {
+        UT_string* s = get_mate_class(threats->vektor, in_Idb);
+        add_threat(utstring_body(s));
+        utstring_free(s);
+    } else {
+        UT_string* d;
+        utstring_new(d);
+        utstring_printf(d, "DUALS(%u)", count);
+        add_threat(utstring_body(d));
+        utstring_free(d);
+    }
 
     return;
 }
@@ -427,8 +468,7 @@ void classify_white_move(BOARD* wm, ID_BOARD* inIdBrd)
 
     if (wm->check == true) {
         //CHECK
-        char* s = "CHECK";
-        utarray_push_back(wfeats, &s);
+        utarray_push_back(wfeats, &lab_check);
     }
 
     if (wm->captured == true) {
@@ -457,22 +497,18 @@ void classify_white_move(BOARD* wm, ID_BOARD* inIdBrd)
     //F_TAKER(n)
 
     if (wm->mover == KING) {
-        char* ck = "CASTK";
-        char* cq = "CASTQ";
-        char* p = "P-FLIGHT";
-        char* s = "S_FLIGHT";
         int diff;
 
         diff = abs(wm->from - wm->to);
 
         if ((diff == 8) || (diff == 1)) {
-            utarray_push_back(wfeats, &p);
+            utarray_push_back(wfeats, &lab_p_flight);
         } else if ((diff == 7) || (diff == 9)) {
-            utarray_push_back(wfeats, &s);
+            utarray_push_back(wfeats, &lab_s_flight);
         } else if ((wm->from == 4) && (wm->to == 6)) {
-            utarray_push_back(wfeats, &ck);
+            utarray_push_back(wfeats, &lab_kcast);
         } else if ((wm->from == 4) && (wm->to == 2)) {
-            utarray_push_back(wfeats, &cq);
+            utarray_push_back(wfeats, &lab_qcast);
         }
     }
 
@@ -553,8 +589,7 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
             if (elt->check == true) {
                 //CHECK
-                char* s = "CHECK";
-                utarray_push_back(bfeats, &s);
+                utarray_push_back(bfeats, &lab_check);
             }
 
             if (elt->captured == true) {
@@ -583,22 +618,18 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             //F_TAKER(n)
 
             if (elt->mover == KING) {
-                char* ck = "CASTK";
-                char* cq = "CASTQ";
-                char* p = "P-FLIGHT";
-                char* s = "S_FLIGHT";
                 int diff;
 
                 diff = abs(elt->from - elt->to);
 
                 if ((diff == 8) || (diff == 1)) {
-                    utarray_push_back(bfeats, &p);
+                    utarray_push_back(bfeats, &lab_p_flight);
                 } else if ((diff == 7) || (diff == 9)) {
-                    utarray_push_back(bfeats, &s);
+                    utarray_push_back(bfeats, &lab_s_flight);
                 } else if ((elt->from == 60) && (elt->to == 62)) {
-                    utarray_push_back(bfeats, &ck);
+                    utarray_push_back(bfeats, &lab_kcast);
                 } else if ((elt->from == 60) && (elt->to == 58)) {
-                    utarray_push_back(bfeats, &cq);
+                    utarray_push_back(bfeats, &lab_qcast);
                 }
             }
 
@@ -623,6 +654,7 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
             if (mates == 1) {
                 UT_string* wm = get_mate_class(elt->nextply->vektor, bmIdBoard);
+                utstring_printf(var, ":");
                 utstring_concat(var, wm);
                 utstring_free(wm);
 
@@ -666,9 +698,8 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
 {
     UT_string* s;
-    char colon = ':';
     utstring_new(s);
-    utstring_printf(s, "%c", colon);
+    utstring_printf(s, "MATE");
 
     return s;
 }
