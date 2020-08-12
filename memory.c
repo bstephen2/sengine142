@@ -24,6 +24,7 @@
 #define SENGINE_HASHVALUE_POOL_BLOCKSIZE 16000
 #define SENGINE_BOARDLIST_POOL_BLOCKSIZE 5000
 #define SENGINE_IDBOARD_POOL_BLOCKSIZE 50
+#define SENGINE_CSL_POOL_BLOCKSIZE 50
 
 extern bool opt_classify;
 
@@ -32,6 +33,7 @@ static pool hval_pool_ptr;
 static pool blist_pool_ptr;
 static pool board_pool_ptr;
 static pool idb_pool_ptr;
+static pool csl_pool_ptr;
 
 void init_mem(void)
 {
@@ -41,6 +43,7 @@ void init_mem(void)
 
     if (opt_classify == true) {
         poolInitialize(&idb_pool_ptr, sizeof(ID_BOARD), SENGINE_IDBOARD_POOL_BLOCKSIZE);
+        poolInitialize(&csl_pool_ptr, sizeof(CHECK_SQUARE_LIST), SENGINE_CSL_POOL_BLOCKSIZE);
     }
 
     return;
@@ -54,6 +57,7 @@ void close_mem(void)
 
     if (opt_classify == true) {
         poolFreePool(&idb_pool_ptr);
+        poolFreePool(&csl_pool_ptr);
     }
 
     return;
@@ -69,6 +73,21 @@ void destroy_mpool()
 {
     poolFreePool(&hval_pool_ptr);
     return;
+}
+
+CHECK_SQUARE_LIST* getCSL()
+{
+    CHECK_SQUARE_LIST* pcsl;
+    pcsl = (CHECK_SQUARE_LIST*) poolMalloc(&csl_pool_ptr);
+    SENGINE_MEM_ASSERT(pcsl);
+    memset((void*) pcsl, '\0', sizeof(CHECK_SQUARE_LIST));
+
+    return pcsl;
+}
+
+void freeCSL(CHECK_SQUARE_LIST* inCSL)
+{
+    poolFree(&csl_pool_ptr, inCSL);
 }
 
 ID_BOARD* getIdBoard()

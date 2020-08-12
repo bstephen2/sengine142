@@ -22,6 +22,7 @@ extern unsigned int opt_moves;
 extern bool opt_set;
 extern bool opt_tries;
 extern bool opt_actual;
+extern bool opt_classify;
 extern unsigned int opt_sols;
 extern bool opt_trivialtries;
 extern enum SOUNDNESS sound;
@@ -388,8 +389,11 @@ static BOARDLIST* gloss_blackMidMove(BOARD* inBrd, int move, int lastmove)
             maxStip = (mateIn > maxStip) ? mateIn : maxStip;
             m->nextply = wml;
             qualifyMove(bml, m);
-            freePosition(m->pos);
-            m->pos = NULL;
+
+            if (opt_classify == false) {
+                freePosition(m->pos);
+                m->pos = NULL;
+            }
         }
     }
 
@@ -435,8 +439,11 @@ static BOARDLIST* gloss_whiteMidMove(BOARD* inBrd, int move, int lastmove)
                         if (ct == 0) {
                             shortStipAchieved = true;
                             m->tag = '#';
-                            freePosition(m->pos);
-                            m->pos = NULL;
+
+                            if (opt_classify == false) {
+                                freePosition(m->pos);
+                                m->pos = NULL;
+                            }
                         } else {
                             LL_DELETE(wml->vektor, m);
                             freeBoard(m);
@@ -462,8 +469,11 @@ static BOARDLIST* gloss_whiteMidMove(BOARD* inBrd, int move, int lastmove)
                         if (ct == 0) {
                             shortStipAchieved = true;
                             m->tag = '=';
-                            freePosition(m->pos);
-                            m->pos = NULL;
+
+                            if (opt_classify == false) {
+                                freePosition(m->pos);
+                                m->pos = NULL;
+                            }
                         } else {
                             LL_DELETE(wml->vektor, m);
                             freeBoard(m);
@@ -595,8 +605,11 @@ static BOARDLIST* gloss_blackMove(BOARD* inBrd, int moves)
             maxStip = (mateIn > maxStip) ? mateIn : maxStip;
             qualifyMove(bml, b);
             b->nextply = wml;
-            freePosition(b->pos);
-            b->pos = NULL;
+
+            if (opt_classify == false) {
+                freePosition(b->pos);
+                b->pos = NULL;
+            }
         }
     }
 
@@ -714,8 +727,10 @@ static BOARDLIST* norm_blackMidMove(BOARD* inBrd, int move)
             m->nextply = wml;
         }
 
-        freePosition(m->pos);
-        m->pos = NULL;
+        if (opt_classify == false) {
+            freePosition(m->pos);
+            m->pos = NULL;
+        }
     }
 
     if (refutationFound == false) {
@@ -851,8 +866,12 @@ static BOARDLIST* blackMove(BOARD* inBrd)
         } else {
             minStip = (mateIn < minStip) ? mateIn : minStip;
             maxStip = (mateIn > maxStip) ? mateIn : maxStip;
-            freePosition(b->pos);
-            b->pos = NULL;
+
+            if (opt_classify == false) {
+                freePosition(b->pos);
+                b->pos = NULL;
+            }
+
             b->nextply = wml;
         }
     }
@@ -900,8 +919,11 @@ static BOARDLIST* norm_final_move(BOARD* inBrd, int move)
                 if (ct == 0) {
                     stipAchieved = true;
                     bd->tag = '#';
-                    freePosition(bd->pos);
-                    bd->pos = NULL;
+
+                    if (opt_classify == false) {
+                        freePosition(bd->pos);
+                        bd->pos = NULL;
+                    }
                 } else {
                     LL_DELETE(wml->vektor, bd);
                     freeBoard(bd);
@@ -923,8 +945,11 @@ static BOARDLIST* norm_final_move(BOARD* inBrd, int move)
                 if (ct == 0) {
                     stipAchieved = true;
                     bd->tag = '=';
-                    freePosition(bd->pos);
-                    bd->pos = NULL;
+
+                    if (opt_classify == false) {
+                        freePosition(bd->pos);
+                        bd->pos = NULL;
+                    }
                 } else {
                     LL_DELETE(wml->vektor, bd);
                     freeBoard(bd);
@@ -1395,8 +1420,11 @@ static BOARDLIST* gloss_final_move(BOARD* inBrd, int moveno)
                     if (ct == 0) {
                         stipAchieved = true;
                         bd->tag = '#';
-                        freePosition(bd->pos);
-                        bd->pos = NULL;
+
+                        if (opt_classify == false) {
+                            freePosition(bd->pos);
+                            bd->pos = NULL;
+                        }
                     } else {
                         LL_DELETE(wml->vektor, bd);
                         freeBoard(bd);
@@ -1422,8 +1450,11 @@ static BOARDLIST* gloss_final_move(BOARD* inBrd, int moveno)
                     if (ct == 0) {
                         stipAchieved = true;
                         bd->tag = '=';
-                        freePosition(bd->pos);
-                        bd->pos = NULL;
+
+                        if (opt_classify == false) {
+                            freePosition(bd->pos);
+                            bd->pos = NULL;
+                        }
                     } else {
                         LL_DELETE(wml->vektor, bd);
                         freeBoard(bd);

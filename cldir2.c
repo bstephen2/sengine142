@@ -50,6 +50,7 @@ void add_threat(char*);
 void add_refut(char*);
 char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 void update_id_board(enum COLOUR, BOARD*, ID_BOARD*, ID_BOARD*);
+void get_check_square_list(enum COLOUR, BOARD*, CHECK_SQUARE_LIST*);
 
 static void do_statics(DIR_SOL*, BOARD*);
 static void do_sets(DIR_SOL*, BOARD*, ID_BOARD*);
@@ -64,7 +65,7 @@ static bool is_flight_giver(BOARD*, unsigned int);
 static bool is_provided(BOARD*, BOARDLIST*);
 static void classify_vars(BOARDLIST*, BOARD*, ID_BOARD*);
 static UT_string* get_mate_class(BOARD*, ID_BOARD*);
-static void classify_white_move(BOARD*, ID_BOARD*);
+static void classify_white_move(BOARD*, BOARD*, ID_BOARD*);
 static void classify_threats(BOARDLIST*, ID_BOARD*);
 
 static int ChangedMates = 0;
@@ -383,7 +384,7 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
     LL_FOREACH(tries->vektor, elt) {
         start_try();
-        classify_white_move(elt, in_Idb);
+        classify_white_move(inBrd, elt, in_Idb);
         ID_BOARD* newIB = cloneIdBoard(in_Idb);
         update_id_board(WHITE, elt, in_Idb, newIB);
 
@@ -408,7 +409,7 @@ void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 #endif
     BOARD* wkey = insol->keys->vektor;
     start_actual_class_xml();
-    classify_white_move(wkey, in_Idb);
+    classify_white_move(inBrd, wkey, in_Idb);
     ID_BOARD* newIB = cloneIdBoard(in_Idb);
     update_id_board(WHITE, wkey, in_Idb, newIB);
 
@@ -448,7 +449,7 @@ void classify_threats(BOARDLIST* threats, ID_BOARD* in_Idb)
     return;
 }
 
-void classify_white_move(BOARD* wm, ID_BOARD* inIdBrd)
+void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd)
 {
 #ifndef NDEBUG
     fputs("classify_white_move()\n", stderr);
@@ -472,11 +473,11 @@ void classify_white_move(BOARD* wm, ID_BOARD* inIdBrd)
     }
 
     if (wm->captured == true) {
-        //CAPTURE[QRBSP](id)
+        //CAP[QRBSP](id)
         UT_string* capstr;
         utstring_new(capstr);
         char cid = inIdBrd->black_ids[wm->to];
-        char pid = get_piece_type(BLACK, wm, wm->to);
+        char pid = get_piece_type(BLACK, initBrd, wm->to);
         utstring_printf(capstr, "CAP%c(%c)", pid, cid);
         utarray_push_back(wfeats, &(utstring_body(capstr)));
         utstring_free(capstr);
@@ -697,9 +698,48 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
 UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
 {
+#ifndef NDEBUG
+    fputs("get_mate_class()\n", stderr);
+#endif
     UT_string* s;
+    CHECK_SQUARE_LIST* csl = getCSL();
     utstring_new(s);
-    utstring_printf(s, "MATE");
+    char id = idBrd->white_ids[inBrd->from];
+    int bkpos = (int) inBrd->pos->kingsq[BLACK];
+    get_check_square_list(WHITE, inBrd, csl);
+
+    if (inBrd->mover == QUEEN) {
+        int qpos = (int) inBrd->to;
+        int dist = (int) abs(bkpos - qpos);
+
+        if ((dist == 1) || (dist == 8)) {
+            utstring_printf(s, "QAR1(%c)", id);
+        } else if ((dist == 2) || (dist == 16)) {
+            utstring_printf(s, "QAR2(%c)", id);
+        } else if ((dist == 7) || (dist == 9)) {
+            utstring_printf(s, "QAB1(%c)", id);
+        } else if (((dist % 7) == 0) || ((dist % 9) == 0)) {
+            utstring_printf(s, "QAB(%c)", id);
+        } else {
+            utstring_printf(s, "QAR(%c)", id);
+        }
+    } else if (inBrd->mover == KING) {
+        utstring_printf(s, "X()-K(%c)BAT", id);
+    } else {
+        utstring_printf(s, "MATE");
+    }
+
+    //([QRB]-[KRBSP])BAT(EP)*
+    //([QRB]-[KRBSP])IND_BAT(EP)*
+    //([QRBSP]-[QRBSP])DCHECK
+    //[BS]
+    //P(EP)*
+    //R
+    //R1
+    //0-0
+    //0-0-0
+
+    freeCSL(csl);
 
     return s;
 }

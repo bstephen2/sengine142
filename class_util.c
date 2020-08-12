@@ -131,3 +131,8 @@ char get_piece_type(enum COLOUR col, BOARD* inBrd, unsigned char to)
 
     return 'X';
 }
+
+void get_check_square_list(enum COLOUR colour, BOARD* inBrd, CHECK_SQUARE_LIST* csl)
+{
+    return;
+}

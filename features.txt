@@ -40,8 +40,10 @@ QAB
 QAB1
 QAR
 QAR1
+QAR2
 R
 R1
-CASTLES
+0-0
+0-0-0
 
 Each distinct variation is listed only once.

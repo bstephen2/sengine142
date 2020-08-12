@@ -155,6 +155,11 @@ typedef struct ID_BOARD {
     char black_ids[65];
 } ID_BOARD;
 
+typedef struct CHECK_SQUARE_LIST {
+    int count;
+    int squares[2];
+} CHECK_SQUARE_LIST;
+
 typedef struct HASH_VAR {
     char* class;
     UT_hash_handle hh;
@@ -242,6 +247,8 @@ HASHVALUE* getHashValue(void);
 KILLERHASHVALUE* getKillerHashValue(void);
 void getKillerHashKey(BOARD*, KILLERKEY*);
 void class_direct_2(DIR_SOL*, BOARD*);
+CHECK_SQUARE_LIST* getCSL();
+void freeCSL(CHECK_SQUARE_LIST*);
 
 #ifdef OPTIONS
 void show_options();

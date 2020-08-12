@@ -1,4 +1,5 @@
 #!/bin/bash
+# 21293
 sengine142	--kings=h1f1 \
 				--gbr=4420.32 \
 				--pos=f6e2a1e1a6g1e4d2f2g5g4 \
