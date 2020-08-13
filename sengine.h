@@ -157,7 +157,9 @@ typedef struct ID_BOARD {
 
 typedef struct CHECK_SQUARE_LIST {
     int count;
-    int squares[2];
+    int square[2];
+    enum PIECE real_piece[2];
+    enum PIECE as_piece[2];
 } CHECK_SQUARE_LIST;
 
 typedef struct HASH_VAR {

@@ -20,6 +20,13 @@
 
 extern BITBOARD clearMask[64];
 extern BITBOARD setMask[64];
+extern BITBOARD knight_attacks[64];
+extern BITBOARD bishop_attacks[64];
+extern BITBOARD rook_attacks[64];
+extern BITBOARD pawn_attacks[2][64];
+extern BITBOARD pawn_moves[2][64];
+extern BBOARD rook_commonAttacks[64][64];
+extern BBOARD bishop_commonAttacks[64][64];
 
 static const unsigned char w_ids[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static const unsigned char b_ids[] = "abcdefghijklmnopqrstuvwxyz";
@@ -134,5 +141,149 @@ char get_piece_type(enum COLOUR col, BOARD* inBrd, unsigned char to)
 
 void get_check_square_list(enum COLOUR colour, BOARD* inBrd, CHECK_SQUARE_LIST* csl)
 {
+    BITBOARD qb;
+    BITBOARD qr;
+    BITBOARD occupied;
+    BBOARD temp;
+    int i;
+    POSITION* pos = inBrd->pos;
+    int square = (int) inBrd->pos->kingsq[colour ^ 1];
+    int count = 0;
+
+    // (2) Atack by a Pawn?
+
+    if ((pawn_attacks[colour ^ 1][square] & pos->bitBoard[colour][PAWN]) !=
+            0) {
+        csl->real_piece[count] = PAWN;
+        csl->as_piece[count] = PAWN;
+        count++;
+        csl->count = count;
+    }
+
+    // (3) Attack by a Knight?
+
+    if ((knight_attacks[square] & pos->bitBoard[colour][KNIGHT]) != 0) {
+        csl->real_piece[count] = KNIGHT;
+        csl->as_piece[count] = KNIGHT;
+        count++;
+        csl->count = count;
+
+        if (count == 2) {
+            return;
+        }
+    }
+
+    // (4) Attack by bishop/queen?
+    qb = pos->bitBoard[colour][BISHOP];
+    occupied = pos->bitBoard[WHITE][OCCUPIED] | pos->bitBoard[BLACK][OCCUPIED];
+
+    if ((bishop_attacks[square] & qb) != 0) {
+        i = tzcount(qb);
+
+        while (i < 64) {
+            temp = bishop_commonAttacks[i][square];
+
+            if (temp.used == true) {
+                if ((occupied & temp.bb) == 0) {
+                    csl->real_piece[count] = BISHOP;
+                    csl->as_piece[count] = BISHOP;
+                    csl->square[count] = i;
+                    count++;
+                    csl->count = count;
+
+                    if (count == 2) {
+                        return;
+                    }
+                }
+            }
+
+            qb &= clearMask[i];
+            i = tzcount(qb);
+        }
+    }
+
+    qb = pos->bitBoard[colour][QUEEN];
+    occupied = pos->bitBoard[WHITE][OCCUPIED] | pos->bitBoard[BLACK][OCCUPIED];
+
+    if ((bishop_attacks[square] & qb) != 0) {
+        i = tzcount(qb);
+
+        while (i < 64) {
+            temp = bishop_commonAttacks[i][square];
+
+            if (temp.used == true) {
+                if ((occupied & temp.bb) == 0) {
+                    csl->real_piece[count] = QUEEN;
+                    csl->as_piece[count] = BISHOP;
+                    csl->square[count] = i;
+                    count++;
+                    csl->count = count;
+
+                    if (count == 2) {
+                        return;
+                    }
+                }
+            }
+
+            qb &= clearMask[i];
+            i = tzcount(qb);
+        }
+    }
+
+    // (5) Attack by rook/queen?
+    qr = pos->bitBoard[colour][ROOK];
+
+    if ((rook_attacks[square] & qr) != 0) {
+        i = tzcount(qr);
+
+        while (i < 64) {
+            temp = rook_commonAttacks[i][square];
+
+            if (temp.used == true) {
+                if ((occupied & temp.bb) == 0) {
+                    csl->real_piece[count] = ROOK;
+                    csl->as_piece[count] = ROOK;
+                    csl->square[count] = i;
+                    count++;
+                    csl->count = count;
+
+                    if (count == 2) {
+                        return;
+                    }
+                }
+            }
+
+            qr &= clearMask[i];
+            i = tzcount(qr);
+        }
+    }
+
+    qr = pos->bitBoard[colour][QUEEN];
+
+    if ((rook_attacks[square] & qr) != 0) {
+        i = tzcount(qr);
+
+        while (i < 64) {
+            temp = rook_commonAttacks[i][square];
+
+            if (temp.used == true) {
+                if ((occupied & temp.bb) == 0) {
+                    csl->real_piece[count] = QUEEN;
+                    csl->as_piece[count] = ROOK;
+                    csl->square[count] = i;
+                    count++;
+                    csl->count = count;
+
+                    if (count == 2) {
+                        return;
+                    }
+                }
+            }
+
+            qr &= clearMask[i];
+            i = tzcount(qr);
+        }
+    }
+
     return;
 }

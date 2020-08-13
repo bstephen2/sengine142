@@ -724,9 +724,49 @@ UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
             utstring_printf(s, "QAR(%c)", id);
         }
     } else if (inBrd->mover == KING) {
-        utstring_printf(s, "X()-K(%c)BAT", id);
+        assert(csl->count == 1);
+        char bpid = idBrd->white_ids[csl->square[0]];
+
+        if (csl->real_piece[0] == ROOK) {
+            utstring_printf(s, "R(%c)-K(%c)BAT", bpid, id);
+        } else if (csl->real_piece[0] == BISHOP) {
+            utstring_printf(s, "B(%c)-K(%c)BAT", bpid, id);
+        } else {
+            // must be QUEEN
+            if (csl->as_piece[0] == ROOK) {
+                utstring_printf(s, "QAR(%c)-K(%c)BAT", bpid, id);
+            } else {
+                // must be BISHOP
+                utstring_printf(s, "QAB(%c)-K(%c)BAT", bpid, id);
+            }
+        }
+
+    } else if (inBrd->mover == ROOK) {
+        if ((csl->count == 1) && (csl->real_piece[0] == ROOK)) {
+            utstring_printf(s, "R(%c)", id);
+        } else {
+            utstring_printf(s, "-R()");
+        }
+    } else if (inBrd->mover == BISHOP) {
+        if ((csl->count == 1) && (csl->real_piece[0] == BISHOP)) {
+            utstring_printf(s, "B(%c)", id);
+        } else {
+            utstring_printf(s, "-B()");
+        }
+    } else if (inBrd->mover == KNIGHT) {
+        if ((csl->count == 1) && (csl->real_piece[0] == KNIGHT)) {
+            utstring_printf(s, "S(%c)", id);
+        } else {
+            utstring_printf(s, "-S()");
+        }
     } else {
-        utstring_printf(s, "MATE");
+        assert(inBrd->mover == PAWN);
+
+        if ((csl->count == 1) && (csl->real_piece[0] == PAWN)) {
+            utstring_printf(s, "P(%c)", id);
+        } else {
+            utstring_printf(s, "-P()");
+        }
     }
 
     //([QRB]-[KRBSP])BAT(EP)*
