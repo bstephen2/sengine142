@@ -31,9 +31,8 @@ P-FLIGHT
 S-FLIGHT
 
 MATE_FEATURE can be only one of the following with any appropriate FEATUREs.
-([QRB]-[KRBSP])BAT(EP)*
-([QRB]-[KRBSP])IND_BAT(EP)*
-([QRBSP]-[QRBSP])DCHECK
+([QRB]+[KRBSP])BAT(EP)*
+([QRB]+[QRBSP])DCHECK
 [BS]
 P(EP)*
 QAB

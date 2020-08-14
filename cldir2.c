@@ -583,7 +583,7 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
             char piece = pieces[elt->mover];
             char id = inIdBrd->black_ids[elt->from];
-            utstring_printf(var, "%c(%c);", piece, id);
+            utstring_printf(var, "%c(%c)", piece, id);
 
             // Identify black features
             utstring_new(bfeat);
@@ -727,17 +727,21 @@ UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
         assert(csl->count == 1);
         char bpid = idBrd->white_ids[csl->square[0]];
 
-        if (csl->real_piece[0] == ROOK) {
-            utstring_printf(s, "R(%c)-K(%c)BAT", bpid, id);
+        if ((inBrd->from == 4) && (inBrd->to == 6)) {
+            utstring_printf(s, "0-0");
+        } else if ((inBrd->from == 4) && (inBrd->to == 2)) {
+            utstring_printf(s, "0-0-0");
+        } else if (csl->real_piece[0] == ROOK) {
+            utstring_printf(s, "R(%c)+K(%c)BAT", bpid, id);
         } else if (csl->real_piece[0] == BISHOP) {
-            utstring_printf(s, "B(%c)-K(%c)BAT", bpid, id);
+            utstring_printf(s, "B(%c)+K(%c)BAT", bpid, id);
         } else {
             // must be QUEEN
             if (csl->as_piece[0] == ROOK) {
-                utstring_printf(s, "QAR(%c)-K(%c)BAT", bpid, id);
+                utstring_printf(s, "QAR(%c)+K(%c)BAT", bpid, id);
             } else {
                 // must be BISHOP
-                utstring_printf(s, "QAB(%c)-K(%c)BAT", bpid, id);
+                utstring_printf(s, "QAB(%c)+K(%c)BAT", bpid, id);
             }
         }
 
@@ -745,19 +749,68 @@ UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
         if ((csl->count == 1) && (csl->real_piece[0] == ROOK)) {
             utstring_printf(s, "R(%c)", id);
         } else {
-            utstring_printf(s, "-R()");
+            // Battery
+            utstring_printf(s, "+R(%c)", id);
         }
     } else if (inBrd->mover == BISHOP) {
         if ((csl->count == 1) && (csl->real_piece[0] == BISHOP)) {
             utstring_printf(s, "B(%c)", id);
         } else {
-            utstring_printf(s, "-B()");
+            // Battery
+            utstring_printf(s, "+B(%c)", id);
         }
     } else if (inBrd->mover == KNIGHT) {
         if ((csl->count == 1) && (csl->real_piece[0] == KNIGHT)) {
             utstring_printf(s, "S(%c)", id);
         } else {
-            utstring_printf(s, "-S()");
+            // Battery.
+            if (csl->count == 1) {
+                // Check must be from rear-piece.
+                char bpid = idBrd->white_ids[csl->square[0]];
+
+                if (csl->as_piece[0] == ROOK) {
+
+                    if (csl->real_piece[0] == ROOK) {
+                        utstring_printf(s, "R(%c)+S(%c)", bpid, id);
+                    } else {
+                        assert(cst->read_piece[0] == QUEEN);
+                        utstring_printf(s, "QAR(%c)+S(%c)", bpid, id);
+                    }
+                } else {
+                    assert(csl->as_piece[0] == BISHOP);
+
+                    if (csl->real_piece[0] == BISHOP) {
+                        utstring_printf(s, "B(%c)+S(%c)", bpid, id);
+                    } else {
+                        assert(cst->read_piece[0] == QUEEN);
+                        utstring_printf(s, "QAB(%c)+S(%c)", bpid, id);
+                    }
+                }
+            } else {
+                // Must be double-check.
+                assert(csl->count == 2);
+                assert(csl->real_piece[0] == KNIGHT);
+                char bpid = idBrd->white_ids[csl->square[1]];
+
+                if (csl->as_piece[1] == ROOK) {
+
+                    if (csl->real_piece[1] == ROOK) {
+                        utstring_printf(s, "R(%c)+S(%c),DCHECK", bpid, id);
+                    } else {
+                        assert(cst->read_piece[1] == QUEEN);
+                        utstring_printf(s, "QAR(%c)+S(%c),DCHECK", bpid, id);
+                    }
+                } else {
+                    assert(csl->as_piece[1] == BISHOP);
+
+                    if (csl->real_piece[1] == BISHOP) {
+                        utstring_printf(s, "B(%c)+S(%c),DCHECK", bpid, id);
+                    } else {
+                        assert(cst->read_piece[1] == QUEEN);
+                        utstring_printf(s, "QAB(%c)+S(%c),DCHECK", bpid, id);
+                    }
+                }
+            }
         }
     } else {
         assert(inBrd->mover == PAWN);
@@ -765,7 +818,7 @@ UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
         if ((csl->count == 1) && (csl->real_piece[0] == PAWN)) {
             utstring_printf(s, "P(%c)", id);
         } else {
-            utstring_printf(s, "-P()");
+            utstring_printf(s, "+P(%c)", id);
         }
     }
 
@@ -776,8 +829,6 @@ UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
     //P(EP)*
     //R
     //R1
-    //0-0
-    //0-0-0
 
     freeCSL(csl);
 
