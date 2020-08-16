@@ -22,12 +22,14 @@ GXMODS	=	genx.c charprops.c
 GXOBJS	=	genx.o charprops.o
 CHDS	=	sengine.h options.h
 CMODS	=	main.c options.c init.c board.c direct.c dir_xml.c boardlist.c \
-			memory.c pool.c cldir2.c dir2_class_xml.c class_util.c
+			memory.c pool.c cldir2.c dir2_class_xml.c class_util.c \
+			wmate.c bmove.c wmove.c
 COBJS	=	main.o options.o init.o board.o direct.o dir_xml.o boardlist.o \
-			memory.o pool.o cldir2.o dir2_class_xml.o class_util.o
+			memory.o pool.o cldir2.o dir2_class_xml.o class_util.o \
+			wmate.o bmove.o wmove.o
 CASMS	=	main.asm options.asm init.asm board.asm direct.asm dir_xml.asm \
 			boardlist.asm memory.asm pool.asm cldir2.asm dir2_class_xml.asm \
-			genx.asm charprops.asm md5.asm class_util.asm
+			genx.asm charprops.asm md5.asm class_util.asm wmate.asm bmove.asm wmove.asm
 
 sengine:	${COBJS} ${MD5OBJS} ${GXOBJS}
 	${LD}   ${LDFLAGS} ${COBJS} ${MD5OBJS} ${GXOBJS}
@@ -44,6 +46,18 @@ class_util.o:	class_util.c ${CHDS} ${MD5HDS} ${GXHDS}
 cldir2.o:	cldir2.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} cldir2.c
 	objconv -fnasm cldir2.o
+	
+wmate.o:	wmate.c ${CHDS} ${MD5HDS} ${GXHDS}
+	${CC} ${CFLAGS} wmate.c
+	objconv -fnasm wmate.o
+	
+wmove.o:	wmove.c ${CHDS} ${MD5HDS} ${GXHDS}
+	${CC} ${CFLAGS} wmove.c
+	objconv -fnasm wmove.o
+	
+bmove.o:	bmove.c ${CHDS} ${MD5HDS} ${GXHDS}
+	${CC} ${CFLAGS} bmove.c
+	objconv -fnasm bmove.o
 
 dir2_class_xml.o:	dir2_class_xml.c ${CHDS} ${MD5HDS} ${GXHDS}
 	${CC} ${CFLAGS} dir2_class_xml.c
