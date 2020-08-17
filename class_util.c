@@ -31,6 +31,7 @@ extern BBOARD bishop_commonAttacks[64][64];
 static const unsigned char w_ids[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static const unsigned char b_ids[] = "abcdefghijklmnopqrstuvwxyz";
 static char pieces[] = "0PSBRQK";
+int count_checks(enum COLOUR, BOARD* inBrd);
 
 int tzcount(BITBOARD inBrd);
 
@@ -278,6 +279,190 @@ void get_check_square_list(enum COLOUR colour, BOARD* inBrd, CHECK_SQUARE_LIST* 
                         return;
                     }
                 }
+            }
+
+            qr &= clearMask[i];
+            i = tzcount(qr);
+        }
+    }
+
+    return;
+}
+
+int count_checks(enum COLOUR colour, BOARD* inBrd)
+{
+    int rc = 0;
+    BITBOARD qb;
+    BITBOARD qr;
+    BITBOARD occupied;
+    BBOARD temp;
+    int i;
+    POSITION* pos = inBrd->pos;
+    int square = (int) inBrd->pos->kingsq[colour ^ 1];
+
+    if ((pawn_attacks[colour ^ 1][square] & pos->bitBoard[colour][PAWN]) !=
+            0) {
+        rc++;
+    }
+
+    // (3) Attack by a Knight?
+
+    if ((knight_attacks[square] & pos->bitBoard[colour][KNIGHT]) != 0) {
+        rc++;
+    }
+
+    // (4) Attack by bishop/queen?
+    qb = pos->bitBoard[colour][BISHOP] | pos->bitBoard[colour][QUEEN];
+    occupied = pos->bitBoard[WHITE][OCCUPIED] | pos->bitBoard[BLACK][OCCUPIED];
+
+    if ((bishop_attacks[square] & qb) != 0) {
+        i = tzcount(qb);
+
+        while (i < 64) {
+            temp = bishop_commonAttacks[i][square];
+
+            if (temp.used == true) {
+                if ((occupied & temp.bb) == 0) {
+                    rc++;
+                }
+            }
+
+            qb &= clearMask[i];
+            i = tzcount(qb);
+        }
+    }
+
+    // (5) Attack by rook/queen?
+    qr = pos->bitBoard[colour][ROOK] | pos->bitBoard[colour][QUEEN];
+
+    if ((rook_attacks[square] & qr) != 0) {
+        i = tzcount(qr);
+
+        while (i < 64) {
+            temp = rook_commonAttacks[i][square];
+
+            if (temp.used == true) {
+                if ((occupied & temp.bb) == 0) {
+                    rc++;
+                }
+            }
+
+            qr &= clearMask[i];
+            i = tzcount(qr);
+        }
+    }
+
+    return rc;
+}
+
+void populate_pin_status(PIN_STATUS* ps, BOARD* beforeBrd, BOARD* afterBrd, ID_BOARD* beforeID, ID_BOARD* afterID)
+{
+    BITBOARD qr;
+    POSITION* pos;
+    enum PIECE p;
+    int i;
+    int j;
+    int before_bchecks = count_checks(BLACK, beforeBrd);
+    int before_wchecks = count_checks(WHITE, beforeBrd);
+    int after_bchecks = count_checks(BLACK, afterBrd);
+    int after_wchecks = count_checks(WHITE, afterBrd);
+
+    pos = beforeBrd->pos;
+
+    // WHITE_BEFORE
+
+    for (p = PAWN; p <= QUEEN; p++) {
+        qr = pos->bitBoard[WHITE][p];
+        i = tzcount(qr);
+
+        while (i < 64) {
+            pos->bitBoard[WHITE][p] &= clearMask[i];
+            pos->bitBoard[WHITE][OCCUPIED] &= clearMask[i];
+            j = count_checks(BLACK, beforeBrd);
+            pos->bitBoard[WHITE][p] |= setMask[i];
+            pos->bitBoard[WHITE][OCCUPIED] |= setMask[i];
+
+            if (j > before_bchecks) {
+                char pic = pieces[p];
+                char id = beforeID->white_ids[i];
+                utstring_printf(ps->w_before, "%c%c", pic, id);
+                break;
+            }
+
+            qr &= clearMask[i];
+            i = tzcount(qr);
+        }
+    }
+
+    // BLACK BEFORE
+
+    for (p = PAWN; p <= QUEEN; p++) {
+        qr = pos->bitBoard[BLACK][p];
+        i = tzcount(qr);
+
+        while (i < 64) {
+            pos->bitBoard[BLACK][p] &= clearMask[i];
+            pos->bitBoard[BLACK][OCCUPIED] &= clearMask[i];
+            j = count_checks(WHITE, beforeBrd);
+            pos->bitBoard[BLACK][p] |= setMask[i];
+            pos->bitBoard[BLACK][OCCUPIED] |= setMask[i];
+
+            if (j > before_wchecks) {
+                char pic = pieces[p];
+                char id = beforeID->black_ids[i];
+                utstring_printf(ps->b_before, "%c%c", pic, id);
+                break;
+            }
+
+            qr &= clearMask[i];
+            i = tzcount(qr);
+        }
+    }
+
+    pos = afterBrd->pos;
+    // WHITE AFTER
+
+    for (p = PAWN; p <= QUEEN; p++) {
+        qr = pos->bitBoard[WHITE][p];
+        i = tzcount(qr);
+
+        while (i < 64) {
+            pos->bitBoard[WHITE][p] &= clearMask[i];
+            pos->bitBoard[WHITE][OCCUPIED] &= clearMask[i];
+            j = count_checks(BLACK, afterBrd);
+            pos->bitBoard[WHITE][p] |= setMask[i];
+            pos->bitBoard[WHITE][OCCUPIED] |= setMask[i];
+
+            if (j > after_bchecks) {
+                char pic = pieces[p];
+                char id = afterID->white_ids[i];
+                utstring_printf(ps->w_after, "%c%c", pic, id);
+                break;
+            }
+
+            qr &= clearMask[i];
+            i = tzcount(qr);
+        }
+    }
+
+    // BLACK AFTER
+
+    for (p = PAWN; p <= QUEEN; p++) {
+        qr = pos->bitBoard[BLACK][p];
+        i = tzcount(qr);
+
+        while (i < 64) {
+            pos->bitBoard[BLACK][p] &= clearMask[i];
+            pos->bitBoard[BLACK][OCCUPIED] &= clearMask[i];
+            j = count_checks(WHITE, afterBrd);
+            pos->bitBoard[BLACK][p] |= setMask[i];
+            pos->bitBoard[BLACK][OCCUPIED] |= setMask[i];
+
+            if (j > after_bchecks) {
+                char pic = pieces[p];
+                char id = afterID->black_ids[i];
+                utstring_printf(ps->b_after, "%c%c", pic, id);
+                break;
             }
 
             qr &= clearMask[i];

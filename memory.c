@@ -24,7 +24,8 @@
 #define SENGINE_HASHVALUE_POOL_BLOCKSIZE 16000
 #define SENGINE_BOARDLIST_POOL_BLOCKSIZE 5000
 #define SENGINE_IDBOARD_POOL_BLOCKSIZE 50
-#define SENGINE_CSL_POOL_BLOCKSIZE 50
+#define SENGINE_CSL_POOL_BLOCKSIZE 10
+#define SENGINE_PIN_STATUS_BLOCKSIZE 10
 
 extern bool opt_classify;
 
@@ -34,6 +35,7 @@ static pool blist_pool_ptr;
 static pool board_pool_ptr;
 static pool idb_pool_ptr;
 static pool csl_pool_ptr;
+static pool ps_pool_ptr;
 
 void init_mem(void)
 {
@@ -44,6 +46,7 @@ void init_mem(void)
     if (opt_classify == true) {
         poolInitialize(&idb_pool_ptr, sizeof(ID_BOARD), SENGINE_IDBOARD_POOL_BLOCKSIZE);
         poolInitialize(&csl_pool_ptr, sizeof(CHECK_SQUARE_LIST), SENGINE_CSL_POOL_BLOCKSIZE);
+        poolInitialize(&ps_pool_ptr, sizeof(PIN_STATUS), SENGINE_PIN_STATUS_BLOCKSIZE);
     }
 
     return;
@@ -58,6 +61,7 @@ void close_mem(void)
     if (opt_classify == true) {
         poolFreePool(&idb_pool_ptr);
         poolFreePool(&csl_pool_ptr);
+        poolFreePool(&ps_pool_ptr);
     }
 
     return;
@@ -72,6 +76,33 @@ void setup_mpool()
 void destroy_mpool()
 {
     poolFreePool(&hval_pool_ptr);
+    return;
+}
+
+PIN_STATUS* get_pin_status()
+{
+    PIN_STATUS* ptr;
+
+    ptr = (PIN_STATUS*) poolMalloc(&ps_pool_ptr);
+    SENGINE_MEM_ASSERT(ptr);
+
+    utstring_new(ptr->w_before);
+    utstring_new(ptr->w_after);
+    utstring_new(ptr->b_before);
+    utstring_new(ptr->b_after);
+
+    return ptr;
+}
+
+void free_pin_status(PIN_STATUS* ptr)
+{
+    utstring_free(ptr->w_before);
+    utstring_free(ptr->w_after);
+    utstring_free(ptr->b_before);
+    utstring_free(ptr->b_after);
+
+    poolFree(&ps_pool_ptr, ptr);
+
     return;
 }
 

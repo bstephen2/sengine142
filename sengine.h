@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include "uthash.h"
 #include "utlist.h"
+#include "utstring.h"
 #include "md5.h"
 
 #ifdef MOVESTAT
@@ -162,6 +163,13 @@ typedef struct CHECK_SQUARE_LIST {
     enum PIECE as_piece[2];
 } CHECK_SQUARE_LIST;
 
+typedef struct PIN_STATUS {
+    UT_string* w_before;
+    UT_string* w_after;
+    UT_string* b_before;
+    UT_string* b_after;
+} PIN_STATUS;
+
 typedef struct HASH_VAR {
     char* class;
     UT_hash_handle hh;
@@ -251,6 +259,9 @@ void getKillerHashKey(BOARD*, KILLERKEY*);
 void class_direct_2(DIR_SOL*, BOARD*);
 CHECK_SQUARE_LIST* getCSL();
 void freeCSL(CHECK_SQUARE_LIST*);
+PIN_STATUS* get_pin_status();
+void free_pin_status(PIN_STATUS*);
+void populate_pin_status(PIN_STATUS*, BOARD*, BOARD*, ID_BOARD*, ID_BOARD*);
 
 #ifdef OPTIONS
 void show_options();

@@ -51,7 +51,7 @@ void add_refut(char*);
 char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 void update_id_board(enum COLOUR, BOARD*, ID_BOARD*, ID_BOARD*);
 UT_string* get_mate_class(BOARD*, ID_BOARD*);
-void classify_white_move(BOARD*, BOARD*, ID_BOARD*);
+void classify_white_move(BOARD*, BOARD*, ID_BOARD*, ID_BOARD*);
 void classify_vars(BOARDLIST*, BOARD*, ID_BOARD*);
 
 static void do_statics(DIR_SOL*, BOARD*);
@@ -384,9 +384,9 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
     LL_FOREACH(tries->vektor, elt) {
         start_try();
-        classify_white_move(inBrd, elt, in_Idb);
         ID_BOARD* newIB = cloneIdBoard(in_Idb);
         update_id_board(WHITE, elt, in_Idb, newIB);
+        classify_white_move(inBrd, elt, in_Idb, newIB);
 
         if (elt->threat != NULL) {
             classify_threats(elt->threat, newIB);
@@ -409,9 +409,9 @@ void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 #endif
     BOARD* wkey = insol->keys->vektor;
     start_actual_class_xml();
-    classify_white_move(inBrd, wkey, in_Idb);
     ID_BOARD* newIB = cloneIdBoard(in_Idb);
     update_id_board(WHITE, wkey, in_Idb, newIB);
+    classify_white_move(inBrd, wkey, in_Idb, newIB);
 
     if (wkey->threat != NULL) {
         classify_threats(wkey->threat, newIB);

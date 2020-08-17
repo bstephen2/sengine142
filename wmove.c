@@ -31,7 +31,7 @@ int featsort(const void* a, const void* b);
 char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 void add_key(char*);
 
-void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd)
+void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd, ID_BOARD* afterIdBrd)
 {
 #ifndef NDEBUG
     fputs("classify_white_move()\n", stderr);
@@ -65,19 +65,33 @@ void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd)
         utstring_free(capstr);
     }
 
-    //EP
+
+    //F-GIVER(n)
+    //F_TAKER(n)
+
     //P-PIN([KQRBSP])
     //N-PIN([KQRBSP])
     //P_SPIN([KQRBSP])
     //N_SPIN([KQRBSP])
+
+    PIN_STATUS* ps = get_pin_status();
+    populate_pin_status(ps, initBrd, wm, inIdBrd, afterIdBrd);
+
+#ifndef NDEBUG
+    fprintf(stderr, "w_before = %s\n", utstring_body(ps->w_before));
+    fprintf(stderr, "w_after = %s\n", utstring_body(ps->w_after));
+    fprintf(stderr, "b_before = %s\n", utstring_body(ps->b_before));
+    fprintf(stderr, "b_after = %s\n", utstring_body(ps->b_after));
+#endif
+
     //P_CUT([KQRBSP])
     //N_CUT([KQRBSP])
     //P_SCUT([KQRBSP])
     //N_SCUT([KQRBSP])
-    //P-GUARD of mating square(s)
-    //N-GUARD of mating square(s)
-    //F-GIVER(n)
-    //F_TAKER(n)
+
+    free_pin_status(ps);
+
+    //EP
 
     if (wm->mover == KING) {
         int diff;

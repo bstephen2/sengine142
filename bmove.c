@@ -100,19 +100,23 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
                 utstring_free(capstr);
             }
 
-            //EP
+            PIN_STATUS* ps = get_pin_status();
+            populate_pin_status(ps, inBrd, elt, inIdBrd, bmIdBoard);
+
             //P-PIN([KQRBSP])
             //N-PIN([KQRBSP])
             //P_SPIN([KQRBSP])
             //N_SPIN([KQRBSP])
+            //OGATE
             //P_CUT([KQRBSP])
             //N_CUT([KQRBSP])
             //P_SCUT([KQRBSP])
             //N_SCUT([KQRBSP])
             //P-GUARD of mating square(s)
             //N-GUARD of mating square(s)
-            //F-GIVER(n)
-            //F_TAKER(n)
+            //EP
+
+            free_pin_status(ps);
 
             if (elt->mover == KING) {
                 int diff;
