@@ -458,7 +458,7 @@ void populate_pin_status(PIN_STATUS* ps, BOARD* beforeBrd, BOARD* afterBrd, ID_B
             pos->bitBoard[BLACK][p] |= setMask[i];
             pos->bitBoard[BLACK][OCCUPIED] |= setMask[i];
 
-            if (j > after_bchecks) {
+            if (j > after_wchecks) {
                 char pic = pieces[p];
                 char id = afterID->black_ids[i];
                 utstring_printf(ps->b_after, "%c%c", pic, id);

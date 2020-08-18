@@ -79,7 +79,7 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
             char piece = pieces[elt->mover];
             char id = inIdBrd->black_ids[elt->from];
-            utstring_printf(var, "%c(%c)", piece, id);
+            utstring_printf(var, "%c(%c);", piece, id);
 
             // Identify black features
             utstring_new(bfeat);
@@ -103,10 +103,104 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             PIN_STATUS* ps = get_pin_status();
             populate_pin_status(ps, inBrd, elt, inIdBrd, bmIdBoard);
 
-            //P-PIN([KQRBSP])
-            //N-PIN([KQRBSP])
-            //P_SPIN([KQRBSP])
-            //N_SPIN([KQRBSP])
+            if (strcmp(utstring_body(ps->b_before), utstring_body(ps->b_after)) != 0) {
+                char* haystack;
+                char* needle;
+                char temp;
+
+                //P_SPIN([KQRBSP])
+                haystack = utstring_body(ps->b_before);
+                needle = utstring_body(ps->b_after);
+
+                while (*needle != '\0') {
+                    temp = *(needle + 2);
+                    *(needle + 2) = '\0';
+
+                    if (strstr(haystack, needle) == NULL) {
+                        UT_string* p;
+                        utstring_new(p);
+                        utstring_printf(p, "P_SPIN%c(%c)", *needle, *(needle + 1));
+                        utarray_push_back(bfeats, &(utstring_body(p)));
+                        utstring_free(p);
+                    }
+
+                    *(needle + 2) = temp;
+
+                    needle += 2;
+                }
+
+                //N_SPIN([KQRBSP])
+                haystack = utstring_body(ps->b_after);
+                needle = utstring_body(ps->b_before);
+
+                while (*needle != '\0') {
+                    temp = *(needle + 2);
+                    *(needle + 2) = '\0';
+
+                    if (strstr(haystack, needle) == NULL) {
+                        UT_string* p;
+                        utstring_new(p);
+                        utstring_printf(p, "N_SPIN%c(%c)", *needle, *(needle + 1));
+                        utarray_push_back(bfeats, &(utstring_body(p)));
+                        utstring_free(p);
+                    }
+
+                    *(needle + 2) = temp;
+
+                    needle += 2;
+                }
+            }
+
+            if (strcmp(utstring_body(ps->w_before), utstring_body(ps->w_after)) != 0) {
+                char* haystack;
+                char* needle;
+                char temp;
+
+                //P-PIN([KQRBSP])
+                haystack = utstring_body(ps->w_before);
+                needle = utstring_body(ps->w_after);
+
+                while (*needle != '\0') {
+                    temp = *(needle + 2);
+                    *(needle + 2) = '\0';
+
+                    if (strstr(haystack, needle) == NULL) {
+                        UT_string* p;
+                        utstring_new(p);
+                        utstring_printf(p, "P_PIN%c(%c)", *needle, *(needle + 1));
+                        utarray_push_back(bfeats, &(utstring_body(p)));
+                        utstring_free(p);
+                    }
+
+                    *(needle + 2) = temp;
+
+                    needle += 2;
+                }
+
+                //N-PIN([KQRBSP])
+                haystack = utstring_body(ps->w_after);
+                needle = utstring_body(ps->w_before);
+
+                while (*needle != '\0') {
+                    temp = *(needle + 2);
+                    *(needle + 2) = '\0';
+
+                    if (strstr(haystack, needle) == NULL) {
+                        UT_string* p;
+                        utstring_new(p);
+                        utstring_printf(p, "N_PIN%c(%c)", *needle, *(needle + 1));
+                        utarray_push_back(bfeats, &(utstring_body(p)));
+                        utstring_free(p);
+                    }
+
+                    *(needle + 2) = temp;
+
+                    needle += 2;
+                }
+            }
+
+            free_pin_status(ps);
+
             //OGATE
             //P_CUT([KQRBSP])
             //N_CUT([KQRBSP])
@@ -115,8 +209,6 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             //P-GUARD of mating square(s)
             //N-GUARD of mating square(s)
             //EP
-
-            free_pin_status(ps);
 
             if (elt->mover == KING) {
                 int diff;

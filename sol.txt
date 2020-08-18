@@ -1,0 +1,166 @@
+Kalulu (v.1.4)
+
+(1b2R1s1/2S4Q/1B4Sp/K3Pq1p/2pPk1BR/5p2/2PP4/8 w - - 0 1)
++---+---+---+---+---+---+---+---+
+|   | b |   |   | R |   | s |   |
++---+---+---+---+---+---+---+---+
+|   |   | S |   |   |   |   | Q |
++---+---+---+---+---+---+---+---+
+|   | B |   |   |   |   | S | p |
++---+---+---+---+---+---+---+---+
+| K |   |   |   | P | q |   | p |
++---+---+---+---+---+---+---+---+
+|   |   | p | P | k |   | B | R |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   | p |   |   |
++---+---+---+---+---+---+---+---+
+|   |   | P | P |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+#2                       (12 + 8)
+
+Solution
+--------
+
+Set play
+
+
+         1..Qe6   2.Bxe6#  
+         1..Qxg6  2.Bh3#   
+                  2.Be6#   
+                  2.Bd7#   
+                  2.Bc8#   
+         1..Qd7   2.Be6#   
+                  2.Bxd7#  
+         1..Qc8   2.Be6#   
+                  2.Bd7#   
+                  2.Bxc8#  
+         1..Qxe5+ 2.Rxe5#  
+
+Try play
+
+1.Se7?   thr      2.Bh3#   
+                  2.Bxf5#  
+                  2.Bxh5#  
+                  2.Qxf5#  
+
+         1..Qxh7  2.Bh3#   
+                  2.Bf5#   
+                  2.Bxh5#  
+                  2.Be6#   
+                  2.Bd7#   
+                  2.Bc8#   
+         1..Sxe7  2.Bh3#   
+                  2.Bxf5#  
+                  2.Bxh5#  
+         1..hxg4  2.Rxg4#  
+                  2.Qxf5#  
+         1..Qg6   2.Bh3#   
+                  2.Bf5#   
+                  2.Bxh5#  
+                  2.Be6#   
+                  2.Bd7#   
+                  2.Bc8#   
+         1..Sf6   2.Bxf5#  
+                  2.Qxf5#  
+         1..f2    2.Bd1#   
+                  2.Be2#   
+                  2.Bxh5#  
+                  2.Qxf5#  
+         1..Kf4!  
+
+1.Sb5?   thr      2.Sc3#   
+                  2.Qb7#   
+
+         1..Kd5   2.Qb7#   
+         1..Qxg6  2.Be6#   
+         1..Qxe5  2.Qb7#   
+         1..Qe6   2.Sc3#   
+                  2.Bxe6#  
+         1..Qd7   2.Sc3#   
+                  2.Be6#   
+         1..Qc8   2.Sc3#   
+                  2.Be6#   
+         1..Qf6   2.Sc3#   
+         1..Qf7   2.Sc3#   
+         1..Bc7   2.Sc3#   
+         1..Sf6   2.Sc3#   
+         1..Se7   2.Sc3#   
+         1..c3    2.Sxc3#  
+                  2.Qb7#   
+         1..Qxg4! 
+
+1.Bh3+?  
+
+         1..Qf4   2.Sxf4#  
+                  2.Se7#   
+                  2.Sf8#   
+                  2.Sh8#   
+                  2.Rxf4#  
+         1..Qg4!  
+
+1.Bxh5+? 
+
+         1..Qf4   2.Sxf4#  
+                  2.Se7#   
+                  2.Sf8#   
+                  2.Sh8#   
+                  2.Rxf4#  
+         1..Qg4!  
+
+1.Qd7?   thr      2.Bxf5#  
+                  2.Qxf5#  
+                  2.Qc6#   
+                  2.Qd5#   
+
+         1..Qxe5+ 2.Rxe5#  
+                  2.Qd5#   
+         1..Qxg6  2.Bf5#   
+         1..Qxd7  2.Be6#   
+                  2.Bxd7#  
+         1..Bxc7  2.Bxf5#  
+                  2.Qc6#   
+         1..hxg4  2.Qc6#   
+                  2.Qd5#   
+         1..Qe6   2.Bxe6#  
+         1..Qf4   2.Bf5#   
+                  2.Qc6#   
+                  2.Qd5#   
+         1..Qg5   2.Bf5#   
+                  2.Qc6#   
+                  2.Qd5#   
+         1..Qf6   2.Bf5#   
+                  2.Qd5#   
+         1..Qf7   2.Bf5#   
+         1..Qf8   2.Bf5#   
+                  2.Qc6#   
+                  2.Qd5#   
+         1..Sf6   2.Bxf5#  
+                  2.Qxf5#  
+         1..Se7   2.Bxf5#  
+         1..f2    2.Qxf5#  
+                  2.Qc6#   
+                  2.Qd5#   
+         1..Qxg4! 
+
+Actual play
+
+1.Sd5!   thr      2.Sc3#   
+
+         1..Kxd5  2.Qb7#   
+         1..Qxg4  2.Sge7#  
+         1..Qxg6  2.Be6#   
+         1..Qxe5  2.Sf4#   
+         1..c3    2.Sxc3#  
+
+Solving time: 0.005336 seconds
+
+Solving Parameters
+------------------
+
+Intended solutions: 1, Set play: on, Try play: on
+Refutations: 1, Trivialtries: off, Actual play: on
+Threats: SHORTEST, Fleck: on, Shortvars: off
+
+Solved by Kalulu version 1.4 on Tue 18 August at 14:00:26

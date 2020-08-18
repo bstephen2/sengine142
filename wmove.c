@@ -69,10 +69,6 @@ void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd, ID_BOARD*
     //F-GIVER(n)
     //F_TAKER(n)
 
-    //P-PIN([KQRBSP])
-    //N-PIN([KQRBSP])
-    //P_SPIN([KQRBSP])
-    //N_SPIN([KQRBSP])
 
     PIN_STATUS* ps = get_pin_status();
     populate_pin_status(ps, initBrd, wm, inIdBrd, afterIdBrd);
@@ -83,6 +79,102 @@ void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd, ID_BOARD*
     fprintf(stderr, "b_before = %s\n", utstring_body(ps->b_before));
     fprintf(stderr, "b_after = %s\n", utstring_body(ps->b_after));
 #endif
+
+    if (strcmp(utstring_body(ps->w_before), utstring_body(ps->w_after)) != 0) {
+        char* haystack;
+        char* needle;
+        char temp;
+
+        //P_SPIN([KQRBSP])
+        haystack = utstring_body(ps->w_before);
+        needle = utstring_body(ps->w_after);
+
+        while (*needle != '\0') {
+            temp = *(needle + 2);
+            *(needle + 2) = '\0';
+
+            if (strstr(haystack, needle) == NULL) {
+                UT_string* p;
+                utstring_new(p);
+                utstring_printf(p, "P_SPIN%c(%c)", *needle, *(needle + 1));
+                utarray_push_back(wfeats, &(utstring_body(p)));
+                utstring_free(p);
+            }
+
+            *(needle + 2) = temp;
+
+            needle += 2;
+        }
+
+        //N_SPIN([KQRBSP])
+        haystack = utstring_body(ps->w_after);
+        needle = utstring_body(ps->w_before);
+
+        while (*needle != '\0') {
+            temp = *(needle + 2);
+            *(needle + 2) = '\0';
+
+            if (strstr(haystack, needle) == NULL) {
+                UT_string* p;
+                utstring_new(p);
+                utstring_printf(p, "N_SPIN%c(%c)", *needle, *(needle + 1));
+                utarray_push_back(wfeats, &(utstring_body(p)));
+                utstring_free(p);
+            }
+
+            *(needle + 2) = temp;
+
+            needle += 2;
+        }
+    }
+
+    if (strcmp(utstring_body(ps->b_before), utstring_body(ps->b_after)) != 0) {
+        char* haystack;
+        char* needle;
+        char temp;
+
+        //P-PIN([KQRBSP])
+        haystack = utstring_body(ps->b_before);
+        needle = utstring_body(ps->b_after);
+
+        while (*needle != '\0') {
+            temp = *(needle + 2);
+            *(needle + 2) = '\0';
+
+            if (strstr(haystack, needle) == NULL) {
+                UT_string* p;
+                utstring_new(p);
+                utstring_printf(p, "P_PIN%c(%c)", *needle, *(needle + 1));
+                utarray_push_back(wfeats, &(utstring_body(p)));
+                utstring_free(p);
+            }
+
+            *(needle + 2) = temp;
+
+            needle += 2;
+        }
+
+        //N-PIN([KQRBSP])
+        haystack = utstring_body(ps->b_after);
+        needle = utstring_body(ps->b_before);
+
+        while (*needle != '\0') {
+            temp = *(needle + 2);
+            *(needle + 2) = '\0';
+
+            if (strstr(haystack, needle) == NULL) {
+                UT_string* p;
+                utstring_new(p);
+                utstring_printf(p, "N_PIN%c(%c)", *needle, *(needle + 1));
+                utarray_push_back(wfeats, &(utstring_body(p)));
+                utstring_free(p);
+            }
+
+            *(needle + 2) = temp;
+
+            needle += 2;
+        }
+    }
 
     //P_CUT([KQRBSP])
     //N_CUT([KQRBSP])
