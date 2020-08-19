@@ -185,6 +185,11 @@ void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd, ID_BOARD*
 
     //EP
 
+    if (wm->ep == true) {
+        char* ep = "EP";
+        utarray_push_back(wfeats, &ep);
+    }
+
     if (wm->mover == KING) {
         int diff;
 

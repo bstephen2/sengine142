@@ -208,7 +208,12 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             //N_SCUT([KQRBSP])
             //P-GUARD of mating square(s)
             //N-GUARD of mating square(s)
+
             //EP
+            if (elt->ep == true) {
+                char* ep = "EP";
+                utarray_push_back(bfeats, &ep);
+            }
 
             if (elt->mover == KING) {
                 int diff;

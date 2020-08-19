@@ -67,12 +67,43 @@ void setup_id_board(BOARD* inBrd, ID_BOARD* idBrd)
     return;
 }
 
+#undef NDEBUG
+
 void update_id_board(enum COLOUR colour, BOARD* inBrd, ID_BOARD* inId, ID_BOARD* outId)
 {
     if (colour == WHITE) {
         if (inBrd->ep == true) {
             outId->white_ids[inBrd->to + 8] = outId->white_ids[inBrd->from];
             outId->white_ids[inBrd->from] = 'Z';
+            outId->black_ids[inBrd->to] = 'Z';
+            
+#ifndef NDEBUG
+            {
+                char before_line[9];
+                char after_line[9];
+                int j;
+
+                before_line[8] = '\0';
+                after_line[8] = '\0';
+
+                fputs("WHITE EP\nWHITE BOARDS\n\n", stderr);
+
+                for (j = 56; j >= 0; j -= 8) {
+                    strncpy(before_line, &(inId->white_ids[j]), 8);
+                    strncpy(after_line, &(outId->white_ids[j]), 8);
+                    fprintf(stderr, "%s\t%s\n", before_line, after_line);
+                }
+
+                fputs("\nWHITE EP\nBLACK BOARDS\n\n", stderr);
+
+                for (j = 56; j >= 0; j -= 8) {
+                    strncpy(before_line, &(inId->black_ids[j]), 8);
+                    strncpy(after_line, &(outId->black_ids[j]), 8);
+                    fprintf(stderr, "%s\t%s\n", before_line, after_line);
+                }
+            }
+#endif
+
         } else if ((inBrd->mover == KING) && (inBrd->from == 4) && (inBrd->to == 6)) {
             // White king-side castling
             outId->white_ids[6] = outId->white_ids[4];
@@ -93,6 +124,35 @@ void update_id_board(enum COLOUR colour, BOARD* inBrd, ID_BOARD* inId, ID_BOARD*
         if (inBrd->ep == true) {
             outId->black_ids[inBrd->to - 8] = outId->black_ids[inBrd->from];
             outId->black_ids[inBrd->from] = 'Z';
+            outId->white_ids[inBrd->to] = 'Z';
+
+#ifndef NDEBUG
+            {
+					char before_line[9];
+					char after_line[9];
+					int j;
+					
+					before_line[8] = '\0';
+					after_line[8] = '\0';
+					
+					fputs("BLACK EP\nWHITE BOARDS\n\n", stderr);
+					
+					for (j = 56; j >= 0; j -= 8) {
+						strncpy(before_line, &(inId->white_ids[j]), 8);
+						strncpy(after_line, &(outId->white_ids[j]), 8);
+						fprintf(stderr, "%s\t%s\n", before_line, after_line);
+					}
+					
+					fputs("\nBLACK EP\nBLACK BOARDS\n\n", stderr);
+					
+					for (j = 56; j >= 0; j -= 8) {
+						strncpy(before_line, &(inId->black_ids[j]), 8);
+						strncpy(after_line, &(outId->black_ids[j]), 8);
+						fprintf(stderr, "%s\t%s\n", before_line, after_line);
+					}
+				}
+#endif
+
         } else if ((inBrd->mover == KING) && (inBrd->from == 60) && (inBrd->to == 62)) {
             // Black king-side castling
             outId->black_ids[62] = outId->black_ids[60];
@@ -113,6 +173,8 @@ void update_id_board(enum COLOUR colour, BOARD* inBrd, ID_BOARD* inId, ID_BOARD*
 
     return;
 }
+
+#define NDEBUG
 
 char get_piece_type(enum COLOUR col, BOARD* inBrd, unsigned char to)
 {

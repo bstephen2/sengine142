@@ -1,14 +1,16 @@
 #!/bin/bash
-# 6556
-sengine142	--kings=a5e4 \
-				--gbr=4255.44 \
-				--pos=h7f5e8h4b6g4b8c7g6g8e5d4c2d2h6h5c4f3 \
+# 78496
+sengine142	--kings=f5e8 \
+				--gbr=0410.21 \
+				--pos=d5h8f6h6h5g5 \
 				--moves=2 \
 				--stip=# \
 				--actual \
 				--set \
-				--fleck \
 				--tries \
+				--fleck \
+				--castling=k \
+				--ep=g5 \
 				--classify > temp.xml
 grep "MesonClass" temp.xml > temp1.xml
 grep "MesonSolution" temp.xml > temp2.xml
