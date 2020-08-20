@@ -28,12 +28,15 @@ void do_rook(UT_string*, BOARD*, ID_BOARD*);
 void do_bishop(UT_string*, BOARD* inBrd, ID_BOARD*);
 void do_knight(UT_string*, BOARD*, ID_BOARD*);
 void do_pawn(UT_string*, BOARD*, ID_BOARD*);
+char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 
 static CHECK_SQUARE_LIST* csl;
 static char id;
+static char cid;
+static char pid;
 static int bkpos;
 
-UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
+UT_string* get_mate_class(BOARD* initBrd, BOARD* inBrd, ID_BOARD* idBrd)
 {
 #ifndef NDEBUG
     fputs("get_mate_class()\n", stderr);
@@ -43,6 +46,8 @@ UT_string* get_mate_class(BOARD* inBrd, ID_BOARD* idBrd)
     csl = getCSL();
     utstring_new(s);
     id = idBrd->white_ids[inBrd->from];
+    cid = idBrd->black_ids[inBrd->to];
+    pid = get_piece_type(BLACK, initBrd, inBrd->to);
     bkpos = (int) inBrd->pos->kingsq[BLACK];
     get_check_square_list(WHITE, inBrd, csl);
 
@@ -105,6 +110,10 @@ void do_queen(UT_string* s, BOARD* inBrd, ID_BOARD* idBrd)
         utstring_printf(s, "QAR(%c)", id);
     }
 
+    if (inBrd->captured == true) {
+        utstring_printf(s, ",X%c(%c)", pid, cid);
+    }
+
     return;
 }
 
@@ -131,6 +140,10 @@ void do_king(UT_string* s, BOARD* inBrd, ID_BOARD* idBrd)
         }
     }
 
+    if (inBrd->captured == true) {
+        utstring_printf(s, ",X%c(%c)", pid, cid);
+    }
+
     return;
 }
 
@@ -149,6 +162,10 @@ void do_rook(UT_string* s, BOARD* inBrd, ID_BOARD* idBrd)
             assert(csl->as_piece[0] == BISHOP);
             utstring_printf(s, "%s(%c)+R(%c),DCHECK", bp, bpid, id);
         }
+    }
+
+    if (inBrd->captured == true) {
+        utstring_printf(s, ",X%c(%c)", pid, cid);
     }
 
     return;
@@ -171,6 +188,10 @@ void do_bishop(UT_string* s, BOARD* inBrd, ID_BOARD* idBrd)
             char* bp = (csl->real_piece[1] == QUEEN) ? "QAR" : "R";
             utstring_printf(s, "%s(%c)+B(%c),DCHECK", bp, bpid, id);
         }
+    }
+
+    if (inBrd->captured == true) {
+        utstring_printf(s, ",X%c(%c)", pid, cid);
     }
 
     return;
@@ -231,43 +252,70 @@ void do_knight(UT_string* s, BOARD* inBrd, ID_BOARD* idBrd)
         }
     }
 
+    if (inBrd->captured == true) {
+        utstring_printf(s, ",X%c(%c)", pid, cid);
+    }
+
     return;
 }
 
 void do_pawn(UT_string* s, BOARD* inBrd, ID_BOARD* idBrd)
 {
-    if ((csl->count == 1) && (csl->real_piece[0] == PAWN)) {
-        // No battery
-        utstring_printf(s, "P(%c)", id);
-    } else {
-        // Battery
-        char bpid;
-        char* bp;
-
-        if (csl->count == 1) {
-            bpid = idBrd->white_ids[csl->square[0]];
-
-            if (csl->as_piece[0] == BISHOP) {
-                bp = (csl->real_piece[0] == QUEEN) ? "QAB" : "B";
-                utstring_printf(s, "%s(%c)+P(%c)", bp, bpid, id);
-            } else {
-                assert(csl->as_piece[0] == ROOK);
-                bp = (csl->real_piece[0] == QUEEN) ? "QAR" : "R";
-                utstring_printf(s, "%s(%c)+P(%c)", bp, bpid, id);
-            }
-
+    if (inBrd->promotion == NOPIECE) {
+        if ((csl->count == 1) && (csl->real_piece[0] == PAWN)) {
+            // No battery
+            utstring_printf(s, "P(%c)", id);
         } else {
-            bpid = idBrd->white_ids[csl->square[1]];
+            // Battery
+            char bpid;
+            char* bp;
 
-            if (csl->as_piece[1] == BISHOP) {
-                bp = (csl->real_piece[1] == QUEEN) ? "QAB" : "B";
-                utstring_printf(s, "%s(%c)+P(%c)DCHECK", bp, bpid, id);
+            if (csl->count == 1) {
+                bpid = idBrd->white_ids[csl->square[0]];
+
+                if (csl->as_piece[0] == BISHOP) {
+                    bp = (csl->real_piece[0] == QUEEN) ? "QAB" : "B";
+                    utstring_printf(s, "%s(%c)+P(%c)", bp, bpid, id);
+                } else {
+                    assert(csl->as_piece[0] == ROOK);
+                    bp = (csl->real_piece[0] == QUEEN) ? "QAR" : "R";
+                    utstring_printf(s, "%s(%c)+P(%c)", bp, bpid, id);
+                }
+
             } else {
-                assert(csl->as_piece[1] == ROOK);
-                bp = (csl->real_piece[1] == QUEEN) ? "QAR" : "R";
-                utstring_printf(s, "%s(%c)+P(%c)DCHECK", bp, bpid, id);
+                bpid = idBrd->white_ids[csl->square[1]];
+
+                if (csl->as_piece[1] == BISHOP) {
+                    bp = (csl->real_piece[1] == QUEEN) ? "QAB" : "B";
+                    utstring_printf(s, "%s(%c)+P(%c)DCHECK", bp, bpid, id);
+                } else {
+                    assert(csl->as_piece[1] == ROOK);
+                    bp = (csl->real_piece[1] == QUEEN) ? "QAR" : "R";
+                    utstring_printf(s, "%s(%c)+P(%c)DCHECK", bp, bpid, id);
+                }
             }
         }
+
+        if (inBrd->captured == true) {
+            utstring_printf(s, ",X%c(%c)", pid, cid);
+
+            if (inBrd->ep == true) {
+                utstring_printf(s, ",EP");
+            }
+        }
+    } else {
+
+        char prom;
+
+        utstring_printf(s, "P");
+
+        if (inBrd->captured == true) {
+            utstring_printf(s, "X%c(%c)", pid, cid);
+        }
+
+        assert((inBrd->promotion == QUEEN) || (inBrd->promotion == KNIGHT));
+        prom = (inBrd->promotion == QUEEN) ? 'Q' : 'S';
+        utstring_printf(s, "=%c", prom);
     }
 
     return;

@@ -50,7 +50,7 @@ void add_threat(char*);
 void add_refut(char*);
 char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 void update_id_board(enum COLOUR, BOARD*, ID_BOARD*, ID_BOARD*);
-UT_string* get_mate_class(BOARD*, ID_BOARD*);
+UT_string* get_mate_class(BOARD*, BOARD*, ID_BOARD*);
 void classify_white_move(BOARD*, BOARD*, ID_BOARD*, ID_BOARD*);
 void classify_vars(BOARDLIST*, BOARD*, ID_BOARD*);
 
@@ -65,7 +65,7 @@ static bool mate_equals(BOARD*, BOARD*);
 static bool black_equals(BOARD*, BOARD*);
 static bool is_flight_giver(BOARD*, unsigned int);
 static bool is_provided(BOARD*, BOARDLIST*);
-static void classify_threats(BOARDLIST*, ID_BOARD*);
+static void classify_threats(BOARD*, BOARDLIST*, ID_BOARD*);
 
 static int ChangedMates = 0;
 static int AddedMates = 0;
@@ -389,7 +389,7 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
         classify_white_move(inBrd, elt, in_Idb, newIB);
 
         if (elt->threat != NULL) {
-            classify_threats(elt->threat, newIB);
+            classify_threats(elt, elt->threat, newIB);
         }
 
         classify_vars(elt->nextply, elt, newIB);
@@ -414,7 +414,7 @@ void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
     classify_white_move(inBrd, wkey, in_Idb, newIB);
 
     if (wkey->threat != NULL) {
-        classify_threats(wkey->threat, newIB);
+        classify_threats(wkey, wkey->threat, newIB);
     }
 
     classify_vars(wkey->nextply, wkey, newIB);
@@ -424,7 +424,7 @@ void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
     return;
 }
 
-void classify_threats(BOARDLIST* threats, ID_BOARD* in_Idb)
+void classify_threats(BOARD* initBrd, BOARDLIST* threats, ID_BOARD* in_Idb)
 {
 #ifndef NDEBUG
     fputs("classify_threats()\n", stderr);
@@ -434,8 +434,24 @@ void classify_threats(BOARDLIST* threats, ID_BOARD* in_Idb)
 
     LL_COUNT(threats->vektor, elt, count);
 
+    if (count == 2) {
+        // Treat promotion to Q/R or Q/B as non dual.
+        BOARD* m1 = threats->vektor;
+        BOARD* m2 = threats->vektor->next;
+
+        if ((m1->mover == PAWN) && (m2->mover == PAWN)) {
+            if ((m1->from == m2->from) && (m1->to == m2->to)) {
+                if ((m1->promotion == QUEEN) && ((m2->promotion == ROOK) || (m2->promotion == BISHOP))) {
+                    // Allowable dual - delete underpromotion.
+                    LL_DELETE(m1, m2);
+                    count--;
+                }
+            }
+        }
+    }
+
     if (count == 1) {
-        UT_string* s = get_mate_class(threats->vektor, in_Idb);
+        UT_string* s = get_mate_class(initBrd, threats->vektor, in_Idb);
         add_threat(utstring_body(s));
         utstring_free(s);
     } else {

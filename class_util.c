@@ -76,7 +76,7 @@ void update_id_board(enum COLOUR colour, BOARD* inBrd, ID_BOARD* inId, ID_BOARD*
             outId->white_ids[inBrd->to + 8] = outId->white_ids[inBrd->from];
             outId->white_ids[inBrd->from] = 'Z';
             outId->black_ids[inBrd->to] = 'Z';
-            
+
 #ifndef NDEBUG
             {
                 char before_line[9];
@@ -128,29 +128,29 @@ void update_id_board(enum COLOUR colour, BOARD* inBrd, ID_BOARD* inId, ID_BOARD*
 
 #ifndef NDEBUG
             {
-					char before_line[9];
-					char after_line[9];
-					int j;
-					
-					before_line[8] = '\0';
-					after_line[8] = '\0';
-					
-					fputs("BLACK EP\nWHITE BOARDS\n\n", stderr);
-					
-					for (j = 56; j >= 0; j -= 8) {
-						strncpy(before_line, &(inId->white_ids[j]), 8);
-						strncpy(after_line, &(outId->white_ids[j]), 8);
-						fprintf(stderr, "%s\t%s\n", before_line, after_line);
-					}
-					
-					fputs("\nBLACK EP\nBLACK BOARDS\n\n", stderr);
-					
-					for (j = 56; j >= 0; j -= 8) {
-						strncpy(before_line, &(inId->black_ids[j]), 8);
-						strncpy(after_line, &(outId->black_ids[j]), 8);
-						fprintf(stderr, "%s\t%s\n", before_line, after_line);
-					}
-				}
+                char before_line[9];
+                char after_line[9];
+                int j;
+
+                before_line[8] = '\0';
+                after_line[8] = '\0';
+
+                fputs("BLACK EP\nWHITE BOARDS\n\n", stderr);
+
+                for (j = 56; j >= 0; j -= 8) {
+                    strncpy(before_line, &(inId->white_ids[j]), 8);
+                    strncpy(after_line, &(outId->white_ids[j]), 8);
+                    fprintf(stderr, "%s\t%s\n", before_line, after_line);
+                }
+
+                fputs("\nBLACK EP\nBLACK BOARDS\n\n", stderr);
+
+                for (j = 56; j >= 0; j -= 8) {
+                    strncpy(before_line, &(inId->black_ids[j]), 8);
+                    strncpy(after_line, &(outId->black_ids[j]), 8);
+                    fprintf(stderr, "%s\t%s\n", before_line, after_line);
+                }
+            }
 #endif
 
         } else if ((inBrd->mover == KING) && (inBrd->from == 60) && (inBrd->to == 62)) {

@@ -30,7 +30,7 @@ extern char* lab_s_flight;
 int featsort(const void* a, const void* b);
 char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 void update_id_board(enum COLOUR, BOARD*, ID_BOARD*, ID_BOARD*);
-UT_string* get_mate_class(BOARD*, ID_BOARD*);
+UT_string* get_mate_class(BOARD*, BOARD*, ID_BOARD*);
 void add_var(char*);
 void add_refut(char*);
 
@@ -57,6 +57,23 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 
         if (elt->nextply != NULL) {
             LL_COUNT(elt->nextply->vektor, m, mates);
+
+            if (mates == 2) {
+                // Treat promotion to Q/R or Q/B as non dual.
+                BOARDLIST* bl = elt->nextply;
+                BOARD* m1 = bl->vektor;
+                BOARD* m2 = bl->vektor->next;
+
+                if ((m1->mover == PAWN) && (m2->mover == PAWN)) {
+                    if ((m1->from == m2->from) && (m1->to == m2->to)) {
+                        if ((m1->promotion == QUEEN) && ((m2->promotion == ROOK) || (m2->promotion == BISHOP))) {
+                            // Allowable dual - delete underpromotion.
+                            LL_DELETE(m1, m2);
+                            mates--;
+                        }
+                    }
+                }
+            }
         } else {
             mates = 0;
         }
@@ -202,6 +219,9 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             free_pin_status(ps);
 
             //OGATE
+            //If mating piece not pinned and mating move not possible before black move.
+            //S_BLOCK
+            //If bK would escape to blocked square if mate were played before black move.
             //P_CUT([KQRBSP])
             //N_CUT([KQRBSP])
             //P_SCUT([KQRBSP])
@@ -251,7 +271,7 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             // Identify white mover and mate details and add to var
 
             if (mates == 1) {
-                UT_string* wm = get_mate_class(elt->nextply->vektor, bmIdBoard);
+                UT_string* wm = get_mate_class(elt, elt->nextply->vektor, bmIdBoard);
                 utstring_printf(var, ":");
                 utstring_concat(var, wm);
                 utstring_free(wm);
