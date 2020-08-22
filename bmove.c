@@ -27,12 +27,19 @@ extern char* lab_kcast;
 extern char* lab_qcast;
 extern char* lab_p_flight;
 extern char* lab_s_flight;
+extern BITBOARD setMask[64];
+
+char* sblock = "SBLOCK";
+char* ogate = "OGATE";
+char* ogateb = "OGATEB";
+
 int featsort(const void* a, const void* b);
 char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 void update_id_board(enum COLOUR, BOARD*, ID_BOARD*, ID_BOARD*);
 UT_string* get_mate_class(BOARD*, BOARD*, ID_BOARD*);
 void add_var(char*);
 void add_refut(char*);
+bool attacks(POSITION*, unsigned char, enum COLOUR);
 
 void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 {
@@ -221,7 +228,28 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
             //OGATE
             //If mating piece not pinned and mating move not possible before black move.
             //S_BLOCK
-            //If bK would escape to blocked square if mate were played before black move.
+
+            if ((mates == 1) && (elt->mover != KING)) {
+                int bkpos = (int) elt->pos->kingsq[BLACK];
+                int to = (int) elt->to;
+                int dist = abs(bkpos - to);
+
+                if ((dist == 1) || (dist == 8) || (dist == 7) || (dist == 9)) {
+                    // Move is next to bK
+                    BOARD* mb;
+                    BITBOARD temp;
+
+                    mb = elt->nextply->vektor;
+                    temp = mb->pos->bitBoard[BLACK][OCCUPIED];
+
+                    if ((temp & setMask[to]) != 0) {
+                        if (attacks(mb->pos, to, WHITE) == false) {
+                            utarray_push_back(bfeats, &sblock);
+                        }
+                    }
+                }
+            }
+
             //P_CUT([KQRBSP])
             //N_CUT([KQRBSP])
             //P_SCUT([KQRBSP])
