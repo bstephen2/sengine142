@@ -1,8 +1,8 @@
 #!/bin/bash
-# 19018
-sengine142	--kings=h1f4 \
-				--gbr=0218.41 \
-				--pos=h5g2e7c5g1b5g5d4e4g4d2f6 \
+# 19109
+sengine142	--kings=g3e5 \
+				--gbr=0858.34 \
+				--pos=f4e1h6e3c7a2e8b8h4g8d7d6c3f3b7g6h5e4 \
 				--moves=2 \
 				--stip=# \
 				--actual \

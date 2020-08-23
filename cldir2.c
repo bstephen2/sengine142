@@ -52,7 +52,7 @@ char get_piece_type(enum COLOUR, BOARD*, unsigned char);
 void update_id_board(enum COLOUR, BOARD*, ID_BOARD*, ID_BOARD*);
 UT_string* get_mate_class(BOARD*, BOARD*, ID_BOARD*);
 void classify_white_move(BOARD*, BOARD*, ID_BOARD*, ID_BOARD*);
-void classify_vars(BOARDLIST*, BOARD*, ID_BOARD*);
+void classify_vars(BOARDLIST*, BOARDLIST*, BOARD*, ID_BOARD*);
 
 static void do_statics(DIR_SOL*, BOARD*);
 static void do_sets(DIR_SOL*, BOARD*, ID_BOARD*);
@@ -362,11 +362,15 @@ void get_added_mates(DIR_SOL* insol)
 
 void do_sets(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
+    BOARDLIST* wlist;
+
 #ifndef NDEBUG
     fputs("do_sets()\n", stderr);
 #endif
     start_set_class_xml();
-    classify_vars(insol->set, inBrd, in_Idb);
+    wlist = generateWhiteBoardlist(inBrd, 1);
+    classify_vars(wlist, insol->set, inBrd, in_Idb);
+    freeBoardlist(wlist);
     end_set_class_xml();
 
     return;
@@ -374,6 +378,8 @@ void do_sets(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
 void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
+    BOARDLIST* wlist;
+
 #ifndef NDEBUG
     fputs("do_virtual()\n", stderr);
 #endif
@@ -392,7 +398,9 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
             classify_threats(elt, elt->threat, newIB);
         }
 
-        classify_vars(elt->nextply, elt, newIB);
+        wlist = generateWhiteBoardlist(elt, 1);
+        classify_vars(wlist, elt->nextply, elt, newIB);
+        freeBoardlist(wlist);
         freeIdBoard(newIB);
         end_try();
     }
@@ -404,6 +412,7 @@ void do_virtual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 
 void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
 {
+    BOARDLIST* wlist;
 #ifndef NDEBUG
     fputs("do_actual()\n", stderr);
 #endif
@@ -417,7 +426,10 @@ void do_actual(DIR_SOL* insol, BOARD* inBrd, ID_BOARD* in_Idb)
         classify_threats(wkey, wkey->threat, newIB);
     }
 
-    classify_vars(wkey->nextply, wkey, newIB);
+    wlist = generateWhiteBoardlist(wkey, 1);
+    classify_vars(wlist, wkey->nextply, wkey, newIB);
+
+    freeBoardlist(wlist);
     freeIdBoard(newIB);
     end_actual_class_xml();
 

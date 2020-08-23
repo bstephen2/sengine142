@@ -41,7 +41,7 @@ void add_var(char*);
 void add_refut(char*);
 bool attacks(POSITION*, unsigned char, enum COLOUR);
 
-void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
+void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 {
 #ifndef NDEBUG
     fputs("classify_vars()\n", stderr);
@@ -50,11 +50,14 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
     assert(bList != NULL);
     assert(inBrd != NULL);
     assert(inIdBrd != NULL);
+    assert(wlist != NULL);
 
     BOARD* elt;
     HASH_VAR* vars = NULL;
     HASH_VAR* s;
     HASH_VAR* tmp;
+    char captured_piece = ' ';
+    char captured_id = ' ';
     UT_string* refut;
     utstring_new(refut);
 
@@ -117,9 +120,9 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
                 //XTURE[QRBSP](id)
                 UT_string* capstr;
                 utstring_new(capstr);
-                char cid = inIdBrd->white_ids[elt->to];
-                char pid = get_piece_type(WHITE, inBrd, elt->to);
-                utstring_printf(capstr, "X%c(%c)", pid, cid);
+                captured_id = inIdBrd->white_ids[elt->to];
+                captured_piece = get_piece_type(WHITE, inBrd, elt->to);
+                utstring_printf(capstr, "X%c(%c)", captured_piece, captured_id);
                 utarray_push_back(bfeats, &(utstring_body(capstr)));
                 utstring_free(capstr);
             }
@@ -210,11 +213,13 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
                     *(needle + 2) = '\0';
 
                     if (strstr(haystack, needle) == NULL) {
-                        UT_string* p;
-                        utstring_new(p);
-                        utstring_printf(p, "N_PIN%c(%c)", *needle, *(needle + 1));
-                        utarray_push_back(bfeats, &(utstring_body(p)));
-                        utstring_free(p);
+                        if ((elt->captured == false) || (captured_piece != *needle) || (captured_id != *(needle + 1))) {
+                            UT_string* p;
+                            utstring_new(p);
+                            utstring_printf(p, "N_PIN%c(%c)", *needle, *(needle + 1));
+                            utarray_push_back(bfeats, &(utstring_body(p)));
+                            utstring_free(p);
+                        }
                     }
 
                     *(needle + 2) = temp;
@@ -223,10 +228,67 @@ void classify_vars(BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
                 }
             }
 
-            free_pin_status(ps);
 
             //OGATE
-            //If mating piece not pinned and mating move not possible before black move.
+            //If mating piece (QRBP) not pinned and mating move not possible before black move.
+            //OGATEB
+            //If mating (QRB) is not pinnded and mating move possible before black move but isn't check.
+
+            if (mates == 1) {
+
+                BOARD* mb = elt->nextply->vektor;
+
+                if ((mb->mover != KING) && (mb->mover != KNIGHT)) {
+
+                    char cid = bmIdBoard->white_ids[mb->from];
+
+                    if (strchr(utstring_body(ps->w_before), cid) == NULL) {
+                        unsigned char mfrom = mb->from;
+                        unsigned char mto = mb->to;
+                        bool mfound = false;
+                        BOARD* mptr;
+
+                        LL_FOREACH(wlist->vektor, mptr) {
+
+                            if ((mfrom == mptr->from) && (mto == mptr->to)) {
+                                mfound = true;
+                                break;
+                            }
+                        }
+
+                        if (mfound == false) {
+                            utarray_push_back(bfeats, &ogate);
+                        }
+                    }
+                }
+
+                if ((mb->mover == QUEEN) || (mb->mover == ROOK) || (mb->mover == BISHOP)) {
+
+                    char cid = bmIdBoard->white_ids[mb->from];
+
+                    if (strchr(utstring_body(ps->w_before), cid) == NULL) {
+                        unsigned char mfrom = mb->from;
+                        unsigned char mto = mb->to;
+                        bool mfound = false;
+                        BOARD* mptr;
+
+                        LL_FOREACH(wlist->vektor, mptr) {
+
+                            if ((mfrom == mptr->from) && (mto == mptr->to) && (mptr->check == false)) {
+                                mfound = true;
+                                break;
+                            }
+                        }
+
+                        if (mfound == true) {
+                            utarray_push_back(bfeats, &ogateb);
+                        }
+                    }
+                }
+            }
+
+            free_pin_status(ps);
+
             //S_BLOCK
 
             if ((mates == 1) && (elt->mover != KING)) {

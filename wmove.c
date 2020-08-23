@@ -40,6 +40,8 @@ void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd, ID_BOARD*
     UT_array* wfeats;
     UT_string* wfeat;
     char** p;
+    char captured_piece = ' ';
+    char captured_id = ' ';
 
     utstring_new(var);
     utstring_new(wfeat);
@@ -58,9 +60,9 @@ void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd, ID_BOARD*
         //X[QRBSP](id)
         UT_string* capstr;
         utstring_new(capstr);
-        char cid = inIdBrd->black_ids[wm->to];
-        char pid = get_piece_type(BLACK, initBrd, wm->to);
-        utstring_printf(capstr, "X%c(%c)", pid, cid);
+        captured_id = inIdBrd->black_ids[wm->to];
+        captured_piece = get_piece_type(BLACK, initBrd, wm->to);
+        utstring_printf(capstr, "X%c(%c)", captured_piece, captured_id);
         utarray_push_back(wfeats, &(utstring_body(capstr)));
         utstring_free(capstr);
     }
@@ -163,11 +165,13 @@ void classify_white_move(BOARD* initBrd, BOARD* wm, ID_BOARD* inIdBrd, ID_BOARD*
             *(needle + 2) = '\0';
 
             if (strstr(haystack, needle) == NULL) {
-                UT_string* p;
-                utstring_new(p);
-                utstring_printf(p, "N_PIN%c(%c)", *needle, *(needle + 1));
-                utarray_push_back(wfeats, &(utstring_body(p)));
-                utstring_free(p);
+                if ((wm->captured == false) || (captured_piece != *needle) || (captured_id != *(needle + 1))) {
+                    UT_string* p;
+                    utstring_new(p);
+                    utstring_printf(p, "N_PIN%c(%c)", *needle, *(needle + 1));
+                    utarray_push_back(wfeats, &(utstring_body(p)));
+                    utstring_free(p);
+                }
             }
 
             *(needle + 2) = temp;

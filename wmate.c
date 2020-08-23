@@ -149,8 +149,15 @@ void do_king(UT_string* s, BOARD* inBrd, ID_BOARD* idBrd)
 
 void do_rook(UT_string* s, BOARD* inBrd, ID_BOARD* idBrd)
 {
+    int qpos = (int) inBrd->to;
+    int dist = (int) abs(bkpos - qpos);
+
     if ((csl->count == 1) && (csl->real_piece[0] == ROOK)) {
-        utstring_printf(s, "R(%c)", id);
+        if ((dist == 1) || (dist == 8)) {
+            utstring_printf(s, "R1(%c)", id);
+        } else {
+            utstring_printf(s, "R(%c)", id);
+        }
     } else {
         // Battery
         char bpid = idBrd->white_ids[csl->square[0]];
