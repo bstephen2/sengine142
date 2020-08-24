@@ -32,6 +32,8 @@ extern BITBOARD setMask[64];
 char* sblock = "SBLOCK";
 char* ogate = "OGATE";
 char* ogateb = "OGATEB";
+char* nguard = "N_GUARD";
+char* scut = "S_CUT";
 
 int featsort(const void* a, const void* b);
 char get_piece_type(enum COLOUR, BOARD*, unsigned char);
@@ -312,12 +314,56 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
                 }
             }
 
-            //P_CUT([KQRBSP])
-            //N_CUT([KQRBSP])
             //P_SCUT([KQRBSP])
-            //N_SCUT([KQRBSP])
-            //P-GUARD of mating square(s)
+            // If the actual mate would have been prevented by another black piece if the moving piece hadn't moved.
             //N-GUARD of mating square(s)
+            // If the actual mate would have been prevented by the moving piece if it hadn't moved.
+
+            if (mates == 1) {
+                BOARD* mb = elt->nextply->vektor;
+                unsigned char mfrom = mb->from;
+                unsigned char mto = mb->to;
+                bool mfound = false;
+                BOARD* mptr;
+
+                LL_FOREACH(wlist->vektor, mptr) {
+
+                    if ((mfrom == mptr->from) && (mto == mptr->to) && (mptr->check == true)) {
+                        mfound = true;
+                        break;
+                    }
+                }
+
+                if (mfound == true) {
+
+                    assert(mptr->tag != '#');
+                    unsigned int mflights;
+                    BOARD* refptr;
+                    bool from_piece_found = false;
+                    BOARDLIST* mblist = generateBlackBoardlist(mptr, 1, &mflights);
+
+                    LL_FOREACH(mblist->vektor, refptr) {
+
+                        if ((refptr->from == elt->from) && (from_piece_found == false)) {
+                            // unguard
+                            utarray_push_back(bfeats, &nguard);
+                            from_piece_found = true;
+                        } else if ((refptr->from != elt->from) && (refptr->mover != KING)) {
+                            // Interference
+                            UT_string* cut;
+                            utstring_new(cut);
+                            char bpiece = pieces[refptr->mover];
+                            char bid = inIdBrd->black_ids[refptr->from];
+
+                            utstring_printf(cut, "S_CUT%c(%c)", bpiece, bid);
+                            utarray_push_back(bfeats, &(utstring_body(cut)));
+                            utstring_free(cut);
+                        }
+                    }
+
+                    freeBoardlist(mblist);
+                }
+            }
 
             //EP
             if (elt->ep == true) {
