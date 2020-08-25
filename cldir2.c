@@ -61,7 +61,7 @@ static void do_actual(DIR_SOL*, BOARD*, ID_BOARD*);
 static int get_set_size(DIR_SOL*);
 static void get_changed_and_removed_mates(DIR_SOL*);
 static void get_added_mates(DIR_SOL*);
-static bool mate_equals(BOARD*, BOARD*);
+static bool mate_equals(BOARD*, BOARD*, BOARD*);
 static bool black_equals(BOARD*, BOARD*);
 static bool is_flight_giver(BOARD*, unsigned int);
 static bool is_provided(BOARD*, BOARDLIST*);
@@ -271,6 +271,7 @@ void get_changed_and_removed_mates(DIR_SOL* insol)
 {
     // Iterate round set variations counting changed and removed.
     // Only inspect variations that are dual-free in set and actual.
+    // A mate by the key-piece going to the same square as in the set play is not a change.
 
     if (insol->set->vektor != NULL) {
         BOARDLIST* defences = insol->keys->vektor->nextply;
@@ -298,7 +299,7 @@ void get_changed_and_removed_mates(DIR_SOL* insol)
                         if (aMateCount == 1) {
                             found = true;
 
-                            if (mate_equals(setMate, actualMates->vektor) == false) {
+                            if (mate_equals(insol->keys->vektor, setMate, actualMates->vektor) == false) {
                                 ChangedMates++;
                             }
 
@@ -477,15 +478,15 @@ void classify_threats(BOARD* initBrd, BOARDLIST* threats, ID_BOARD* in_Idb)
     return;
 }
 
-bool mate_equals(BOARD* brda, BOARD* brdb)
+bool mate_equals(BOARD* key, BOARD* setmate, BOARD* actualmate)
 {
-    if (brda->mover != brdb->mover) return false;
+    if (setmate->mover != actualmate->mover) return false;
 
-    if (brda->to != brdb->to) return false;
+    if (setmate->to != actualmate->to) return false;
 
-    if (brda->from != brdb->from) return false;
+    if ((setmate->from != actualmate->from) && (key->to != actualmate->from)) return false;
 
-    if (brda->promotion != brdb->promotion) return false;
+    if (setmate->promotion != actualmate->promotion) return false;
 
     return true;
 }

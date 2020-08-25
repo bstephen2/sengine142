@@ -42,6 +42,7 @@ UT_string* get_mate_class(BOARD*, BOARD*, ID_BOARD*);
 void add_var(char*);
 void add_refut(char*);
 bool attacks(POSITION*, unsigned char, enum COLOUR);
+int count_checks(enum COLOUR, BOARD*);
 
 void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* inIdBrd)
 {
@@ -321,6 +322,7 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
 
             if (mates == 1) {
                 BOARD* mb = elt->nextply->vektor;
+                int mchecks = count_checks(WHITE, mb);
                 unsigned char mfrom = mb->from;
                 unsigned char mto = mb->to;
                 bool mfound = false;
@@ -348,7 +350,7 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
                             // unguard
                             utarray_push_back(bfeats, &nguard);
                             from_piece_found = true;
-                        } else if ((refptr->from != elt->from) && (refptr->mover != KING)) {
+                        } else if ((refptr->from != elt->from) && (refptr->mover != KING) && (mchecks == 1)) {
                             // Interference
                             UT_string* cut;
                             utstring_new(cut);
