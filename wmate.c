@@ -19,7 +19,6 @@
 #include "sengine.h"
 #include "utarray.h"
 #include "utstring.h"
-#undef NDEBUG
 
 void get_check_square_list(enum COLOUR, BOARD*, CHECK_SQUARE_LIST*);
 void do_queen(UT_string*, BOARD*, ID_BOARD*);

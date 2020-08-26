@@ -19,7 +19,6 @@
 #include "sengine.h"
 #include "utarray.h"
 #include "utstring.h"
-#undef NDEBUG
 
 void setup_id_board(BOARD*, ID_BOARD*);
 

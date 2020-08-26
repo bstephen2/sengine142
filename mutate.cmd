@@ -8,4 +8,4 @@ sengine142 ^
 	--set ^
 	--tries ^
 	--fleck ^
-	--meson > mutate.xml
+	--classify

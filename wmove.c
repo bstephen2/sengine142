@@ -19,7 +19,6 @@
 #include "sengine.h"
 #include "utarray.h"
 #include "utstring.h"
-#undef NDEBUG
 
 extern char pieces[];
 extern char* lab_check;
