@@ -230,7 +230,6 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
                 }
             }
 
-
             //OGATE
             //If mating piece (QRBP) not pinned and mating move not possible before black move.
             //OGATEB
@@ -289,8 +288,6 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
                 }
             }
 
-            free_pin_status(ps);
-
             //S_BLOCK
 
             if ((mates == 1) && (elt->mover != KING)) {
@@ -315,7 +312,8 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
             }
 
             //P_SCUT([KQRBSP])
-            // If the actual mate would have been prevented by another black piece if the moving piece hadn't moved.
+            // If the actual mate would have been prevented by another black piece (that isn't pinned)
+            // if the moving piece hadn't moved.
             //N-GUARD of mating square(s)
             // If the actual mate would have been prevented by the moving piece if it hadn't moved.
 
@@ -352,13 +350,17 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
                         } else if ((refptr->from != elt->from) && (refptr->mover != KING) && (mchecks == 1)) {
                             // Interference
                             UT_string* cut;
-                            utstring_new(cut);
-                            char bpiece = pieces[refptr->mover];
-                            char bid = inIdBrd->black_ids[refptr->from];
+                            char bpid[3];
+                            bpid[0] = pieces[refptr->mover];
+                            bpid[1] = inIdBrd->black_ids[refptr->from];
+                            bpid[2] = '\0';
 
-                            utstring_printf(cut, "S_CUT%c(%c)", bpiece, bid);
-                            utarray_push_back(bfeats, &(utstring_body(cut)));
-                            utstring_free(cut);
+                            if (strstr(utstring_body(ps->b_after), bpid) == NULL) {
+                                utstring_new(cut);
+                                utstring_printf(cut, "S_CUT%c(%c)", bpid[0], bpid[1]);
+                                utarray_push_back(bfeats, &(utstring_body(cut)));
+                                utstring_free(cut);
+                            }
                         }
                     }
 
@@ -388,6 +390,8 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
                 }
             }
 
+            free_pin_status(ps);
+
             // Sort black features
             utarray_sort(bfeats, featsort);
             // Add black features to var
@@ -409,7 +413,7 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
 
             if (mates == 1) {
                 UT_string* wm = get_mate_class(elt, elt->nextply->vektor, bmIdBoard);
-                utstring_printf(var, ":");
+                utstring_printf(var, "::");
                 utstring_concat(var, wm);
                 utstring_free(wm);
 

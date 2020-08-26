@@ -109,7 +109,10 @@ void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
     fprintf(stderr, "BLACK_ID => %s\n", p_init_idbd->black_ids);
 #endif
 
-    do_sets(insol, inBrd, p_init_idbd);
+    if (inBrd->check == false) {
+        do_sets(insol, inBrd, p_init_idbd);
+    }
+
     do_virtual(insol, inBrd, p_init_idbd);
     do_actual(insol, inBrd, p_init_idbd);
 
@@ -122,6 +125,9 @@ void class_direct_2(DIR_SOL* insol, BOARD* inBrd)
 
 void do_statics(DIR_SOL* insol, BOARD* inBrd)
 {
+#ifndef NDEBUG
+    fputs("do_statics()\n", stderr);
+#endif
     BOARDLIST* bList;
     unsigned int flights;
     int set_count;
@@ -129,16 +135,19 @@ void do_statics(DIR_SOL* insol, BOARD* inBrd)
     bool set_complete = false;
 
     start_static_class_xml();
-    bList = generateBlackBoardlist(inBrd, 1, &flights);
 
-    if (insol->set->vektor != NULL) {
-        BOARD* elt;
+    if (inBrd->check == false) {
+        bList = generateBlackBoardlist(inBrd, 1, &flights);
 
-        if (bList->vektor != NULL) {
-            LL_COUNT(insol->set->vektor, elt, set_count);
-            LL_COUNT(bList->vektor, elt, set_full_count);
+        if (insol->set->vektor != NULL) {
+            BOARD* elt;
 
-            set_complete = (set_count == set_full_count) ? true : false;
+            if (bList->vektor != NULL) {
+                LL_COUNT(insol->set->vektor, elt, set_count);
+                LL_COUNT(bList->vektor, elt, set_full_count);
+
+                set_complete = (set_count == set_full_count) ? true : false;
+            }
         }
     }
 
@@ -177,42 +186,43 @@ void do_statics(DIR_SOL* insol, BOARD* inBrd)
             }
         }
 
-    } else {
-        add_static_type("WHITE_IN_CHECK");
-    }
+        /*
+        	* Count strong unprovided moves.
+        	*/
+        {
+            BOARD* elt;
+            BOARDLIST* sets = insol->set;
 
-    /*
-      * Count strong unprovided moves.
-      */
+            LL_FOREACH(bList->vektor, elt) {
 
-    {
-        BOARD* elt;
-        BOARDLIST* sets = insol->set;
-
-        LL_FOREACH(bList->vektor, elt) {
-
-            if (elt->mover == KING) {
-                if (is_provided(elt, sets) == false) {
-                    UpFlights++;
-                    TotUp++;
-                }
-            } else if (elt->check == true) {
-                if (is_provided(elt, sets) == false) {
-                    UpChecks++;
-                    TotUp++;
-                }
-            } else if (elt->captured == true) {
-                if (is_provided(elt, sets) == false) {
-                    UpCaps++;
-                    TotUp++;
-                }
-            } else if (is_flight_giver(elt, flights) == true) {
-                if (is_provided(elt, sets) == false) {
-                    UpFgivers++;
-                    TotUp++;
+                if (elt->mover == KING) {
+                    if (is_provided(elt, sets) == false) {
+                        UpFlights++;
+                        TotUp++;
+                    }
+                } else if (elt->check == true) {
+                    if (is_provided(elt, sets) == false) {
+                        UpChecks++;
+                        TotUp++;
+                    }
+                } else if (elt->captured == true) {
+                    if (is_provided(elt, sets) == false) {
+                        UpCaps++;
+                        TotUp++;
+                    }
+                } else if (is_flight_giver(elt, flights) == true) {
+                    if (is_provided(elt, sets) == false) {
+                        UpFgivers++;
+                        TotUp++;
+                    }
                 }
             }
         }
+
+        freeBoardlist(bList);
+
+    } else {
+        add_static_type("WHITE_IN_CHECK");
     }
 
     add_up_flights(UpFlights);
@@ -223,7 +233,6 @@ void do_statics(DIR_SOL* insol, BOARD* inBrd)
 
     end_static_clas_xml();
 
-    freeBoardlist(bList);
 
     return;
 }
