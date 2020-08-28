@@ -317,7 +317,7 @@ void classify_vars(BOARDLIST* wlist, BOARDLIST* blist, BOARD* inBrd, ID_BOARD* i
             //N-GUARD of mating square(s)
             // If the actual mate would have been prevented by the moving piece if it hadn't moved.
 
-            if (mates == 1) {
+            if ((mates == 1) && (elt->mover != KING)) {
                 BOARD* mb = elt->nextply->vektor;
                 int mchecks = count_checks(WHITE, mb);
                 unsigned char mfrom = mb->from;
